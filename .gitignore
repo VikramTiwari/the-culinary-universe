@@ -55,4 +55,4 @@ yarn-error.log*
 
 # Local generated culinary data seeds
 public/ingredients.json
-public/dataset.bin
+data/

@@ -7,7 +7,7 @@ SHELL := /bin/bash
 # Prepend the Rustup toolchain binary directory to the system PATH
 export PATH := /Users/vik/.rustup/toolchains/stable-aarch64-apple-darwin/bin:$(PATH)
 
-.PHONY: help install wasm-build data-gen dev build clean
+.PHONY: help install wasm-build data-gen dev build clean deploy
 
 # Default target
 help:
@@ -42,6 +42,10 @@ dev: data-gen wasm-build
 # Verify and bundle production assets
 build: data-gen wasm-build
 	npx tsc && npx vite build
+
+# Deploy compiled production bundle to GitHub Pages
+deploy: build
+	npx -y gh-pages -d dist
 
 # Clean temporary packages and bundle products
 clean:

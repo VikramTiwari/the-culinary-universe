@@ -7,11 +7,16 @@ import umap
 def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(script_dir)
+    
+    # We put raw files (csv and bin) inside a git-ignored 'data' folder at root level
+    data_dir = os.path.join(project_root, 'data')
+    os.makedirs(data_dir, exist_ok=True)
+    
     public_dir = os.path.join(project_root, 'public')
     os.makedirs(public_dir, exist_ok=True)
     
-    csv_path = os.path.join(public_dir, 'epicure_core.csv')
-    bin_path = os.path.join(public_dir, 'dataset.bin')
+    csv_path = os.path.join(data_dir, 'epicure_core.csv')
+    bin_path = os.path.join(data_dir, 'dataset.bin')
     json_path = os.path.join(public_dir, 'ingredients.json')
 
     if not os.path.exists(csv_path):
@@ -131,7 +136,7 @@ def main():
         json.dump(ingredients_list, f, indent=2)
     print(f"Successfully generated metadata containing {len(ingredients_list)} items at: {json_path}")
 
-    # 5. Save public/dataset.bin as flat binary floats
+    # 5. Save data/dataset.bin as flat binary floats
     with open(bin_path, 'wb') as f:
         f.write(normalized_vectors.tobytes())
     print(f"Successfully generated flat dataset binary containing {len(df)} vectors of {dim_count} dimensions at: {bin_path}")

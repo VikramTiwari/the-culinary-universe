@@ -146,7 +146,7 @@ export default function VectorMath() {
   }, [pointCloud, selectedIdx]);
 
   useEffect(() => {
-    fetch('/ingredients.json')
+    fetch('./ingredients.json')
       .then((res) => res.json())
       .then((data: Ingredient[]) => setIngredients(data))
       .catch(() => setError('Failed to load ingredient metadata'));

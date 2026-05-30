@@ -12,19 +12,20 @@ export const HeaderHUD: React.FC = () => {
         Ingredients clustered close together share similar taste profiles and pair 
         beautifully together in recipes. Learn more in the{' '}
         <a 
-          href="https://arxiv.org/pdf/2605.22391" 
+          href="https://github.com/VikramTiwari/the-culinary-universe" 
           target="_blank" 
           rel="noopener noreferrer"
           style={{
             color: 'var(--color-herbal)',
             textDecoration: 'underline',
             fontWeight: 600,
-            transition: 'opacity 0.15s ease'
+            transition: 'opacity 0.15s ease',
+            pointerEvents: 'auto'
           }}
           onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.8')}
           onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
         >
-          research paper
+          project repository
         </a>.
       </p>
     </header>

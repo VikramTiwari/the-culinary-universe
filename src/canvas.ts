@@ -1,222 +1,22 @@
-import { project3DTo2D, ProjectionParams, ProjectedPoint } from './math';
-import { TASTE_NAMES } from './constants';
+import { project3DTo2D, ProjectionParams } from './math';
+import {
+  drawCosmicDust,
+  drawAxes,
+  drawNeighborsTethers,
+  drawComparisonTether,
+  drawStandardParticles,
+  drawActiveNode,
+  Star,
+  CanvasProjectedPoint
+} from './canvasHelpers';
 
-const TASTE_RGBS: { [key: string]: string } = {
-  '#be4b34': '190, 75, 52',    // Sweet
-  '#bf9525': '191, 149, 37',   // Sour
-  '#487f65': '72, 127, 101',   // Salty
-  '#2c2f42': '44, 47, 66',     // Bitter
-  '#9a3821': '154, 56, 33',    // Umami
-  '#be3f25': '190, 63, 37',    // Spicy
-  '#355f37': '53, 95, 55',     // Herbal
-  '#437554': '67, 117, 84',    // Citrusy
-  '#474d52': '71, 77, 82',     // Smoky
-  '#b67732': '182, 119, 50',   // FattyRich
-  '#6366f1': '99, 102, 241'    // Indigo fallback
-};
-
-export interface Star {
+export interface AlchemicalNode {
   x: number;
   y: number;
   z: number;
-  opacity: number;
-  radius: number;
-}
-
-export interface CanvasProjectedPoint extends ProjectedPoint {
-  index: number;
-  name: string;
-  color: string;
-  color2?: string;
-  x: number;
-  y: number;
-  z: number;
-}
-
-export function drawCosmicDust(ctx: CanvasRenderingContext2D, cosmicDust: Star[], params: ProjectionParams) {
-  ctx.fillStyle = 'rgba(96, 108, 56, 0.38)';
-  cosmicDust.forEach((star) => {
-    const { px, py, scale } = project3DTo2D(star, params);
-    ctx.globalAlpha = star.opacity * scale;
-    ctx.beginPath();
-    ctx.arc(px, py, star.radius * scale * 2, 0, Math.PI * 2);
-    ctx.fill();
-  });
-  ctx.globalAlpha = 1.0;
-}
-
-export function drawAxes(
-  ctx: CanvasRenderingContext2D,
-  params: ProjectionParams,
-  axisTasteX: number,
-  axisTasteY: number,
-  axisTasteZ: number,
-  zoom: number
-) {
-  ctx.lineWidth = 2.0;
-
-  const labelX = axisTasteX === -1
-    ? 'SWEET (+X)'
-    : `${TASTE_NAMES[axisTasteX].toUpperCase()} (+X)`;
-
-  const labelY = axisTasteY === -1
-    ? 'SPICY (+Y)'
-    : `${TASTE_NAMES[axisTasteY].toUpperCase()} (+Y)`;
-
-  const labelZ = axisTasteZ === -1
-    ? 'SALTY (+Z)'
-    : `${TASTE_NAMES[axisTasteZ].toUpperCase()} (+Z)`;
-
-  const axes = [
-    { x: 220, y: 0, z: 0, color: '#212529', label: labelX },
-    { x: 0, y: -220, z: 0, color: '#212529', label: labelY },
-    { x: 0, y: 0, z: 220, color: '#212529', label: labelZ }
-  ];
-
-  ctx.font = 'italic 700 16px "Cormorant Garamond", Georgia, serif';
-  ctx.fillStyle = '#212529';
-  ctx.strokeStyle = '#212529';
-
-  axes.forEach((axis) => {
-    const { px, py } = project3DTo2D(axis, { ...params, zoom });
-    ctx.beginPath();
-    ctx.moveTo(params.centerX, params.centerY);
-    ctx.lineTo(px, py);
-    ctx.stroke();
-
-    ctx.fillText(axis.label, px + 6, py + 4);
-  });
-}
-
-export function drawNeighborsTethers(ctx: CanvasRenderingContext2D, projected: CanvasProjectedPoint[], primaryIdx: number) {
-  const hp = projected.find((p) => p.index === primaryIdx);
-  if (!hp) return;
-
-  const tethers = projected
-    .filter((p) => p.index !== primaryIdx)
-    .map((p) => {
-      const dx = p.x - hp.x, dy = p.y - hp.y, dz = p.z - hp.z;
-      return { node: p, dist: Math.sqrt(dx * dx + dy * dy + dz * dz) };
-    });
-
-  tethers.sort((a, b) => a.dist - b.dist);
-  ctx.lineWidth = 1.0;
-  ctx.strokeStyle = 'rgba(96, 108, 56, 0.35)';
-  ctx.fillStyle = 'rgba(33, 37, 41, 0.75)';
-  ctx.font = 'italic 500 15px "Cormorant Garamond", Georgia, serif';
-
-  tethers.slice(0, 3).forEach((t) => {
-    ctx.globalAlpha = 0.55 * t.node.scale;
-    ctx.setLineDash([3, 4]);
-
-    ctx.beginPath();
-    ctx.moveTo(hp.px, hp.py);
-    ctx.lineTo(t.node.px, t.node.py);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    ctx.fillText(t.node.name, t.node.px + 7, t.node.py + 4);
-  });
-  ctx.globalAlpha = 1.0;
-}
-
-export function drawComparisonTether(ctx: CanvasRenderingContext2D, pX: CanvasProjectedPoint, pY: CanvasProjectedPoint) {
-  ctx.globalAlpha = 0.95;
-  ctx.lineWidth = 2.0;
-  ctx.strokeStyle = '#be4b34';
-  ctx.setLineDash([4, 4]);
-  ctx.beginPath();
-  ctx.moveTo(pX.px, pX.py);
-  ctx.lineTo(pY.px, pY.py);
-  ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.globalAlpha = 1.0;
-}
-
-export function drawStandardParticles(
-  ctx: CanvasRenderingContext2D,
-  projected: CanvasProjectedPoint[],
-  selectedIdx: number | null,
-  hoveredIdx: number | null,
-  randomHighlights: number[] = []
-) {
-  projected.forEach((p) => {
-    const isActive = p.index === selectedIdx || p.index === hoveredIdx || randomHighlights.includes(p.index);
-    if (isActive) return;
-
-    const radius = Math.max(0.5, 2.8 * p.scale);
-    const opacity = Math.min(Math.max((p.scale - 0.25) * 1.5, 0.04), 0.85);
-
-    ctx.beginPath();
-    ctx.arc(p.px, p.py, radius, 0, Math.PI * 2);
-
-    const rgb = TASTE_RGBS[p.color] || '99, 102, 241';
-    ctx.fillStyle = `rgba(${rgb}, ${opacity.toFixed(3)})`;
-    ctx.fill();
-  });
-}
-
-export function drawActiveNode(
-  ctx: CanvasRenderingContext2D,
-  p: CanvasProjectedPoint,
-  frame: number,
-  isHoveredCompare: boolean,
-  isRandomHighlight: boolean = false
-) {
-  ctx.globalAlpha = isRandomHighlight ? 0.65 : 1.0;
-  const baseRadius = 8.5;
-  const radius = Math.max(1.0, baseRadius * p.scale);
-  const pulse = (frame % 60) / 60;
-
-  ctx.beginPath();
-  ctx.arc(p.px, p.py, radius * (1.0 + pulse * 2.2), 0, Math.PI * 2);
-  ctx.strokeStyle = isHoveredCompare ? `rgba(190, 75, 52, ${0.8 - pulse})` : `rgba(96, 108, 56, ${0.8 - pulse})`;
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.arc(p.px, p.py, radius * 3.5, 0, Math.PI * 2);
-  ctx.fillStyle = isHoveredCompare ? 'rgba(190, 75, 52, 0.09)' : 'rgba(96, 108, 56, 0.09)';
-  ctx.fill();
-
-  ctx.beginPath();
-  ctx.arc(p.px, p.py, radius, 0, Math.PI * 2);
-  if (p.color2) {
-    const grad = ctx.createLinearGradient(p.px - radius, p.py - radius, p.px + radius, p.py + radius);
-    grad.addColorStop(0, p.color);
-    grad.addColorStop(0.5, p.color);
-    grad.addColorStop(0.5, p.color2);
-    grad.addColorStop(1, p.color2);
-    ctx.fillStyle = grad;
-  } else {
-    ctx.fillStyle = p.color;
-  }
-  ctx.fill();
-
-  ctx.beginPath();
-  ctx.arc(p.px, p.py, radius, 0, Math.PI * 2);
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 2.0;
-  ctx.stroke();
-
-  const labelX = p.px + radius + 10;
-  const labelY = p.py + 4;
-  ctx.font = 'italic 700 17px "Cormorant Garamond", Georgia, serif';
-  ctx.textAlign = 'left';
-
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-  ctx.fillText(p.name, labelX - 1, labelY - 1);
-  ctx.fillText(p.name, labelX + 1, labelY - 1);
-  ctx.fillText(p.name, labelX - 1, labelY + 1);
-  ctx.fillText(p.name, labelX + 1, labelY + 1);
-  ctx.fillText(p.name, labelX, labelY - 1);
-  ctx.fillText(p.name, labelX, labelY + 1);
-  ctx.fillText(p.name, labelX - 1, labelY);
-  ctx.fillText(p.name, labelX + 1, labelY);
-
-  ctx.fillStyle = '#212529';
-  ctx.fillText(p.name, labelX, labelY);
-  ctx.globalAlpha = 1.0;
+  positives: number[];
+  negatives: number[];
+  searchResults: { index: number; score: number }[];
 }
 
 export interface DrawSceneOptions {
@@ -237,6 +37,8 @@ export interface DrawSceneOptions {
   hoveredIdx: number | null;
   frame: number;
   randomHighlights?: number[];
+  alchemicalNode?: AlchemicalNode | null;
+  alchemyActive?: boolean;
 }
 
 export function drawScene(options: DrawSceneOptions) {
@@ -244,21 +46,90 @@ export function drawScene(options: DrawSceneOptions) {
     ctx, pointCloud, currentCoords, cosmicDust, projectionParams, zoom,
     showAxes, axisTasteX, axisTasteY, axisTasteZ,
     showTethers, primaryIdx, isComparing, selectedIdx, hoveredIdx, frame,
-    randomHighlights = []
+    randomHighlights = [],
+    alchemicalNode = null,
+    alchemyActive = false
   } = options;
 
   drawCosmicDust(ctx, cosmicDust, projectionParams);
 
-  const projected: CanvasProjectedPoint[] = pointCloud.map((p, idx) => {
+  let projected: CanvasProjectedPoint[] = pointCloud.map((p, idx) => {
     const coords = currentCoords[idx] || { x: p.x, y: p.y, z: p.z };
     const { px, py, scale, rz } = project3DTo2D(coords, { ...projectionParams, zoom });
     return { ...p, px, py, scale, rz, x: coords.x, y: coords.y, z: coords.z };
   });
 
+  // Filter UMAP stars in Alchemy Lab Mode (Focus Constellation)
+  if (alchemyActive) {
+    if (alchemicalNode) {
+      const activeSet = new Set<number>();
+      alchemicalNode.positives.forEach((idx) => activeSet.add(idx));
+      alchemicalNode.negatives.forEach((idx) => activeSet.add(idx));
+      alchemicalNode.searchResults.slice(0, 10).forEach((res) => activeSet.add(res.index));
+      projected = projected.filter((p) => activeSet.has(p.index));
+    } else {
+      // Empty formulation board in alchemist lab mode: show zero stars!
+      projected = [];
+    }
+  }
+
   projected.sort((a, b) => b.rz - a.rz);
 
   if (showAxes) drawAxes(ctx, projectionParams, axisTasteX, axisTasteY, axisTasteZ, zoom);
   if (showTethers && primaryIdx !== null) drawNeighborsTethers(ctx, projected, primaryIdx);
+
+  // Draw Alchemical connection tethers
+  if (alchemicalNode) {
+    const { px, py } = project3DTo2D(alchemicalNode, { ...projectionParams, zoom });
+
+    // 1. Draw glowing green lines to positive nodes
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = 'rgba(53, 95, 55, 0.55)'; // positive tethers (Rosemary Forest Green)
+    ctx.setLineDash([2, 2]);
+    alchemicalNode.positives.forEach((idx) => {
+      const p = projected.find((item) => item.index === idx);
+      if (p) {
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        ctx.lineTo(p.px, p.py);
+        ctx.stroke();
+      }
+    });
+
+    // 2. Draw glowing red lines to negative nodes
+    ctx.strokeStyle = 'rgba(190, 75, 52, 0.55)'; // negative tethers (Ripe Strawberry Red)
+    alchemicalNode.negatives.forEach((idx) => {
+      const p = projected.find((item) => item.index === idx);
+      if (p) {
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        ctx.lineTo(p.px, p.py);
+        ctx.stroke();
+      }
+    });
+    ctx.setLineDash([]);
+
+    // 3. Draw tethers connecting to the nearest matches (sage accent)
+    ctx.lineWidth = 1.2;
+    ctx.strokeStyle = 'rgba(96, 108, 56, 0.45)'; // standard tethers (Aromatic Sage Accent)
+    ctx.fillStyle = 'rgba(33, 37, 41, 0.95)';
+    ctx.font = 'italic 700 15px "Cormorant Garamond", Georgia, serif';
+    ctx.setLineDash([3, 3]);
+
+    alchemicalNode.searchResults.slice(0, 10).forEach((res) => {
+      const p = projected.find((item) => item.index === res.index);
+      if (p) {
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        ctx.lineTo(p.px, p.py);
+        ctx.stroke();
+
+        const text = `${p.name} (${Math.max(0, 100 - res.score * 0.15).toFixed(0)}%)`;
+        ctx.fillText(text, p.px + 7, p.py + 4);
+      }
+    });
+    ctx.setLineDash([]);
+  }
 
   if (isComparing && selectedIdx !== null && hoveredIdx !== null) {
     const pX = projected.find((p) => p.index === selectedIdx);
@@ -281,6 +152,67 @@ export function drawScene(options: DrawSceneOptions) {
   if (hoveredIdx !== null && hoveredIdx !== selectedIdx) {
     const p = projected.find((item) => item.index === hoveredIdx);
     if (p) drawActiveNode(ctx, p, frame, true, false);
+  }
+
+  // Draw Alchemical Supernova Node Core on top
+  if (alchemicalNode) {
+    const { px, py, scale } = project3DTo2D(alchemicalNode, { ...projectionParams, zoom });
+    const baseRadius = 12.0;
+    const radius = Math.max(1.0, baseRadius * scale);
+    const pulse = (frame % 60) / 60;
+
+    // Glowing shell
+    ctx.beginPath();
+    ctx.arc(px, py, radius * (1.0 + pulse * 1.8), 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(224, 122, 95, ${0.85 - pulse})`;
+    ctx.lineWidth = 2.0;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(px, py, radius * 3.0, 0, Math.PI * 2);
+    const glowGrad = ctx.createRadialGradient(px, py, 2, px, py, radius * 3.0);
+    glowGrad.addColorStop(0, 'rgba(224, 122, 95, 0.25)');
+    glowGrad.addColorStop(1, 'rgba(224, 122, 95, 0.0)');
+    ctx.fillStyle = glowGrad;
+    ctx.fill();
+
+    // Solid core with linear alchemist gradient
+    ctx.beginPath();
+    ctx.arc(px, py, radius, 0, Math.PI * 2);
+    const coreGrad = ctx.createLinearGradient(px - radius, py - radius, px + radius, py + radius);
+    coreGrad.addColorStop(0, '#bf9525'); // Honey gold
+    coreGrad.addColorStop(1, '#be4b34'); // Strawberry red
+    ctx.fillStyle = coreGrad;
+    ctx.fill();
+
+    // Inner white glow
+    ctx.beginPath();
+    ctx.arc(px, py, radius, 0, Math.PI * 2);
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // Golden border
+    ctx.beginPath();
+    ctx.arc(px, py, radius + 1, 0, Math.PI * 2);
+    ctx.strokeStyle = '#bf9525';
+    ctx.lineWidth = 1.0;
+    ctx.stroke();
+
+    // Alchemical name tag
+    const labelX = px + radius + 10;
+    const labelY = py + 4;
+    ctx.font = 'bold italic 18px "Cormorant Garamond", Georgia, serif';
+    ctx.textAlign = 'left';
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+    ctx.fillText('🔮 Synthesized Compound', labelX - 1, labelY - 1);
+    ctx.fillText('🔮 Synthesized Compound', labelX + 1, labelY - 1);
+    ctx.fillText('🔮 Synthesized Compound', labelX - 1, labelY + 1);
+    ctx.fillText('🔮 Synthesized Compound', labelX + 1, labelY + 1);
+
+    ctx.fillStyle = '#be4b34'; // Glowing alchemist red
+    ctx.fillText('🔮 Synthesized Compound', labelX, labelY);
   }
 
   return projected.map((p) => ({ index: p.index, px: p.px, py: p.py }));

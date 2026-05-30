@@ -1,0 +1,481 @@
+/* ==========================================================================
+   Vector Search Lab Styles (Premium Glassmorphism Grid)
+   ========================================================================== */
+
+.search-container {
+  width: 100%;
+  min-height: 100vh;
+  padding: 180px 40px 40px 40px;
+  background-color: var(--bg-primary);
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 32px;
+  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+  position: relative;
+  z-index: 2;
+  overflow-y: auto;
+}
+
+@media (max-width: 1024px) {
+  .search-container {
+    grid-template-columns: 1fr;
+    padding: 240px 24px 40px 24px;
+    gap: 24px;
+  }
+}
+
+.search-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.search-main-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.search-card {
+  padding: 28px;
+  box-shadow: 0 16px 40px rgba(96, 108, 56, 0.04);
+}
+
+.search-card-title {
+  font-size: 1.7rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+  border-bottom: 1px solid rgba(96, 108, 56, 0.08);
+  padding-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Interactive Input Groups */
+.search-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+}
+
+.search-input-label {
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.search-field-container {
+  position: relative;
+  width: 100%;
+}
+
+.search-input-field {
+  width: 100%;
+  padding: 12px 16px 12px 38px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid var(--border-glass);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 14.5px;
+  color: var(--text-primary);
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+}
+
+.search-input-field:focus {
+  border-color: var(--color-glow);
+  box-shadow: 0 0 0 3px rgba(96, 108, 56, 0.1), inset 0 1px 2px rgba(0,0,0,0.01);
+  background: #ffffff;
+}
+
+/* Autocomplete suggestion popovers */
+.autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 240px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid var(--border-glass);
+  border-radius: 10px;
+  margin-top: 6px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  z-index: 100;
+}
+
+.autocomplete-item {
+  padding: 11px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: background 0.15s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.02);
+}
+
+.autocomplete-item:last-child {
+  border-bottom: none;
+}
+
+.autocomplete-item:hover {
+  background: rgba(96, 108, 56, 0.06);
+}
+
+.autocomplete-item-taste {
+  font-size: 11px;
+  font-style: italic;
+  font-weight: 500;
+  color: var(--color-glow);
+}
+
+/* Tag/Chip Container */
+.chip-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+  min-height: 48px;
+  padding: 8px 12px;
+  background: rgba(96, 108, 56, 0.02);
+  border: 1px dashed rgba(96, 108, 56, 0.12);
+  border-radius: 10px;
+}
+
+.ingredient-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  animation: fadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ingredient-chip.positive {
+  background: rgba(53, 95, 55, 0.08);
+  color: var(--color-herbal);
+  border: 1px solid rgba(53, 95, 55, 0.16);
+}
+
+.ingredient-chip.negative {
+  background: rgba(190, 75, 52, 0.08);
+  color: var(--color-sweet);
+  border: 1px solid rgba(190, 75, 52, 0.16);
+}
+
+.chip-remove-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  color: inherit;
+  opacity: 0.5;
+  padding: 0 2px;
+  display: inline-flex;
+  align-items: center;
+  transition: opacity 0.15s ease;
+}
+
+.chip-remove-btn:hover {
+  opacity: 1.0;
+}
+
+/* Vector Equation Card */
+.vector-equation-card {
+  padding: 20px 28px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.equation-symbol {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  color: var(--text-muted);
+  font-size: 1.3rem;
+  user-select: none;
+}
+
+/* Real-time Results Table */
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.results-table th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  border-bottom: 2px solid rgba(96, 108, 56, 0.08);
+}
+
+.results-table td {
+  padding: 16px;
+  border-bottom: 1px solid rgba(96, 108, 56, 0.05);
+  font-size: 14.5px;
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+.results-table tr:hover td {
+  background: rgba(96, 108, 56, 0.02);
+}
+
+.similarity-badge {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1px;
+}
+
+.similarity-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.similarity-bar-outer {
+  flex-grow: 1;
+  height: 6px;
+  background: rgba(96, 108, 56, 0.06);
+  border-radius: 99px;
+  overflow: hidden;
+  max-width: 140px;
+}
+
+.similarity-bar-inner {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.5s cubic-bezier(0.1, 0.8, 0.3, 1);
+}
+
+.sensory-tags-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: 280px;
+}
+
+.taste-tag {
+  display: inline-block;
+  font-size: 9.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 7px;
+  border-radius: 6px;
+}
+
+/* Loading/Status Indicators */
+.worker-loading-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 40px;
+  text-align: center;
+  gap: 12px;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(96, 108, 56, 0.1);
+  border-radius: 99px;
+  border-top-color: var(--color-herbal);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.worker-status-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  background: rgba(96, 108, 56, 0.04);
+  border: 1px solid rgba(96, 108, 56, 0.08);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+  width: fit-content;
+}
+
+/* ==========================================================================
+   Refactored Subcomponent Classes (Inline Styles Extracted)
+   ========================================================================== */
+
+/* Vector Search Result Match Cards */
+.vector-match-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid var(--border-glass);
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.vector-match-card:hover {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(96, 108, 56, 0.25);
+  box-shadow: 0 4px 12px rgba(96, 108, 56, 0.03);
+}
+
+.vector-match-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.vector-match-rank {
+  font-weight: 800;
+  color: var(--text-muted);
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  width: 28px;
+}
+
+.vector-match-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.vector-match-tags {
+  display: flex;
+  gap: 4px;
+  margin-top: 3px;
+}
+
+.vector-match-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.btn-teleport {
+  font-family: 'Outfit', sans-serif;
+  font-size: 10px;
+  padding: 5px 11px;
+  border-radius: 16px;
+  background: var(--color-herbal);
+  color: #ffffff;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.btn-teleport:hover {
+  background: #254426;
+}
+
+/* Vector Equation Panel */
+.vector-equation-panel {
+  border-top: 1px solid rgba(96, 108, 56, 0.08);
+  padding-top: 16px;
+  margin-top: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.45rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.vector-equation-label {
+  font-size: 15px;
+  margin-right: 4px;
+}
+
+.vector-equation-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.vector-equation-chip {
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.vector-equation-chip.pos {
+  background: rgba(53, 95, 55, 0.06);
+  color: var(--color-herbal);
+  border: 1px solid rgba(53, 95, 55, 0.12);
+}
+
+.vector-equation-chip.neg {
+  background: rgba(190, 75, 52, 0.06);
+  color: var(--color-sweet);
+  border: 1px solid rgba(190, 75, 52, 0.12);
+}
+
+.vector-equation-result {
+  color: var(--color-glow);
+  font-weight: 700;
+  font-style: italic;
+  font-size: 13.5px;
+}
+
+/* Sensory Signature Panel */
+.sensory-signature-panel {
+  padding: 22px;
+  height: fit-content;
+}
+
+.sensory-signature-title {
+  font-size: 1.3rem;
+  margin-bottom: 16px;
+}
+
+.sensory-signature-placeholder {
+  font-size: 11.5px;
+  font-style: italic;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}

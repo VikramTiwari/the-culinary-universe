@@ -1,0 +1,85 @@
+/* Global Styles & Variables - Artisanal Parchment & Sage Culinary Theme */
+:root {
+  --bg-primary: #ede9df;       /* Warm Aged Linen Parchment */
+  --bg-secondary: #e2dcd0;     /* Warm Plaster / Plinth Linen */
+  --bg-glass: rgba(255, 255, 255, 0.75);
+  --border-glass: rgba(96, 108, 56, 0.12); /* Soft Olive Green Border */
+  --border-glass-focus: rgba(96, 108, 56, 0.4);
+  
+  /* Harmonious Culinary Color Palette - Fresh Organic Ingredients */
+  --color-sweet: #be4b34;      /* Ripe Strawberry Red-Clay */
+  --color-sour: #bf9525;       /* Golden Mustard Honey */
+  --color-salty: #487f65;      /* Fine Aged Sea Salt Teal */
+  --color-bitter: #2c2f42;     /* Roasted Cocoa Espresso */
+  --color-umami: #9a3821;      /* Sundried Roasted Tomato */
+  --color-spicy: #be3f25;      /* Fiery Cayenne Chili */
+  --color-herbal: #355f37;     /* Rosemary Forest Green */
+  --color-citrusy: #437554;    /* Key Lime Bergamot Green */
+  --color-smoky: #474d52;      /* Oakwood Charcoal */
+  --color-fatty: #b67732;      /* Toasted Chestnut Butter */
+  
+  /* Text and Accents */
+  --text-primary: #212529;     /* Deep Cast Iron Charcoal */
+  --text-secondary: #495057;   /* Hearth Stone Slate */
+  --text-muted: #868e96;       /* Soft Linen Grey */
+  --color-glow: #606c38;       /* Aromatic Sage Accent */
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(96, 108, 56, 0.05) 0%, transparent 45%),
+    radial-gradient(circle at 90% 80%, rgba(224, 122, 95, 0.05) 0%, transparent 45%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/* Typography Headers - Elegant Culinary Serif */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* Custom Scrollbar for Sleek Aesthetics */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(96, 108, 56, 0.12);
+  border-radius: 99px;
+  border: 2px solid var(--bg-primary);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-glow);
+}
+
+/* Glassmorphism Panel Wrapper */
+.glass-panel {
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid var(--border-glass);
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-panel:hover {
+  border-color: rgba(96, 108, 56, 0.22);
+  box-shadow: 0 12px 30px rgba(96, 108, 56, 0.05);
+}

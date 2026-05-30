@@ -34,6 +34,7 @@ wasm-build:
 # Seed dataset flat binary and JSON metadata
 data-gen:
 	.venv/bin/python3 scripts/download-dataset.py
+	cp data/dataset.bin public/dataset.bin
 
 # Launch local dev server (compiling WASM and generating dataset if missing)
 dev: data-gen wasm-build

@@ -43,9 +43,10 @@ dev: data-gen wasm-build
 build: data-gen wasm-build
 	npx tsc && npx vite build
 
-# Deploy compiled production bundle to GitHub Pages
+# Deploy compiled production bundle to both GitHub Pages and Firebase Hosting
 deploy: build
 	npx -y gh-pages -d dist
+	npx -y firebase-tools@latest deploy --only hosting
 
 # Deploy compiled production bundle to Firebase Hosting
 deploy-firebase: build

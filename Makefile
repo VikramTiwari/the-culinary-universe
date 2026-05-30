@@ -7,7 +7,7 @@ SHELL := /bin/bash
 # Prepend the Rustup toolchain binary directory to the system PATH
 export PATH := /Users/vik/.rustup/toolchains/stable-aarch64-apple-darwin/bin:$(PATH)
 
-.PHONY: help install wasm-build data-gen dev build clean deploy
+.PHONY: help install wasm-build data-gen dev build clean deploy deploy-firebase
 
 # Default target
 help:
@@ -46,6 +46,10 @@ build: data-gen wasm-build
 # Deploy compiled production bundle to GitHub Pages
 deploy: build
 	npx -y gh-pages -d dist
+
+# Deploy compiled production bundle to Firebase Hosting
+deploy-firebase: build
+	npx -y firebase-tools@latest deploy --only hosting
 
 # Clean temporary packages and bundle products
 clean:

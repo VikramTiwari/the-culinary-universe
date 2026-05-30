@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "wasm:build": "wasm-pack build ./wasm-engine --target web --out-dir ../src/wasm-engine/pkg",
     "generate-data": "node scripts/generate-dataset.js",
-    "deploy": "npm run build && npx -y gh-pages -d dist"
+    "deploy": "npm run build && npx -y gh-pages -d dist",
+    "deploy:firebase": "npm run build && npx -y firebase-tools@latest deploy --only hosting"
   },
   "dependencies": {
     "lucide-react": "^0.435.0",

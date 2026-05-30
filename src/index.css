@@ -1,0 +1,489 @@
+/* Global Styles & Variables - Artisanal Parchment & Sage Culinary Theme */
+:root {
+  --bg-primary: #ede9df;       /* Warm Aged Linen Parchment */
+  --bg-secondary: #e2dcd0;     /* Warm Plaster / Plinth Linen */
+  --bg-glass: rgba(255, 255, 255, 0.75);
+  --border-glass: rgba(96, 108, 56, 0.12); /* Soft Olive Green Border */
+  --border-glass-focus: rgba(96, 108, 56, 0.4);
+  
+  /* Harmonious Culinary Color Palette - Fresh Organic Ingredients */
+  --color-sweet: #be4b34;      /* Ripe Strawberry Red-Clay */
+  --color-sour: #bf9525;       /* Golden Mustard Honey */
+  --color-salty: #487f65;      /* Fine Aged Sea Salt Teal */
+  --color-bitter: #2c2f42;     /* Roasted Cocoa Espresso */
+  --color-umami: #9a3821;      /* Sundried Roasted Tomato */
+  --color-spicy: #be3f25;      /* Fiery Cayenne Chili */
+  --color-herbal: #355f37;     /* Rosemary Forest Green */
+  --color-citrusy: #437554;    /* Key Lime Bergamot Green */
+  --color-smoky: #474d52;      /* Oakwood Charcoal */
+  --color-fatty: #b67732;      /* Toasted Chestnut Butter */
+  
+  /* Text and Accents */
+  --text-primary: #212529;     /* Deep Cast Iron Charcoal */
+  --text-secondary: #495057;   /* Hearth Stone Slate */
+  --text-muted: #868e96;       /* Soft Linen Grey */
+  --color-glow: #606c38;       /* Aromatic Sage Accent */
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(96, 108, 56, 0.05) 0%, transparent 45%),
+    radial-gradient(circle at 90% 80%, rgba(224, 122, 95, 0.05) 0%, transparent 45%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/* Typography Headers - Elegant Culinary Serif */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* Custom Scrollbar for Sleek Aesthetics */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(96, 108, 56, 0.12);
+  border-radius: 99px;
+  border: 2px solid var(--bg-primary);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-glow);
+}
+
+/* Glassmorphism Panel Wrapper */
+.glass-panel {
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid var(--border-glass);
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-panel:hover {
+  border-color: rgba(96, 108, 56, 0.22);
+  box-shadow: 0 12px 30px rgba(96, 108, 56, 0.05);
+}
+
+/* Full-Screen Visualizer Container */
+.visualizer-container {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+  color: #212529;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Floating HUD Header */
+.hud-header {
+  position: absolute;
+  top: 32px;
+  left: 32px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+  user-select: none;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.hud-header-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hud-header-subtitle span {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 20px;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: 0.05em;
+  color: var(--color-glow);
+}
+
+.hud-header-title {
+  font-size: 2.55rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #212529 30%, #606c38 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-top: 6px;
+  letter-spacing: -0.03em;
+}
+
+.hud-header-desc {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-top: 6px;
+  max-width: 420px;
+}
+
+/* Floating HUD Card (Hover Tooltip) */
+.hud-card {
+  position: absolute;
+  bottom: 32px;
+  left: 32px;
+  z-index: 10;
+  min-width: 320px;
+  padding: 20px;
+  box-shadow: 0 16px 40px rgba(96, 108, 56, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hud-card-title-label {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 16.5px;
+  font-weight: 600;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  color: var(--color-glow);
+}
+
+.hud-card-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.hud-card-title {
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-top: 2px;
+  letter-spacing: -0.01em;
+}
+
+.hud-card-section-label {
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-secondary);
+}
+
+.sensory-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px 20px;
+}
+
+.sensory-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sensory-label-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.sensory-label-row span:last-child {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 17.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.sensory-bar-track {
+  width: 100%;
+  height: 5px;
+  background: rgba(96, 108, 56, 0.08);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.sensory-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Floating Color Legend */
+.hud-legend {
+  position: absolute;
+  bottom: 32px;
+  right: 32px;
+  z-index: 10;
+  padding: 16px;
+  width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 12px 30px rgba(96, 108, 56, 0.05);
+}
+
+.hud-legend-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 16.5px;
+  font-weight: 600;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  color: var(--color-glow);
+}
+
+.hud-legend-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hud-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hud-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 99px;
+}
+
+.hud-legend-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* Floating Controls Deck */
+.hud-deck {
+  position: absolute;
+  top: 32px;
+  right: 32px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.hud-status-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  font-size: 12.5px;
+  font-family: 'Outfit', monospace;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.hud-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 99px;
+  background-color: var(--color-herbal);
+  box-shadow: 0 0 8px var(--color-herbal);
+}
+
+.hud-controls-panel {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 200px;
+}
+
+.hud-controls-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 18.5px;
+  font-weight: 600;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  color: var(--color-glow);
+  border-bottom: 1px solid rgba(96, 108, 56, 0.08);
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+}
+
+.hud-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.hud-btn:hover {
+  background: rgba(96, 108, 56, 0.08);
+  color: var(--text-primary);
+}
+
+.hud-btn-active {
+  background: rgba(96, 108, 56, 0.12);
+  color: var(--color-herbal);
+}
+
+.hud-btn-active:hover {
+  background: rgba(96, 108, 56, 0.18);
+  color: var(--color-herbal);
+}
+
+.hud-btn-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hud-btn-state {
+  font-size: 12.5px;
+  font-family: monospace;
+  opacity: 0.8;
+}
+
+.hud-btn-action {
+  background: var(--color-herbal);
+  border: 1px solid rgba(96, 108, 56, 0.15);
+  border-radius: 6px;
+  color: #ffffff;
+  padding: 6px 12px;
+  font-weight: 700;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.hud-btn-action:hover {
+  background: #476a46;
+  border-color: rgba(96, 108, 56, 0.3);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(96, 108, 56, 0.15);
+}
+
+/* Nearest Neighbors List */
+.hud-neighbors-section {
+  border-top: 1px solid rgba(96, 108, 56, 0.08);
+  padding-top: 14px;
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hud-neighbors-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 16.5px;
+  font-weight: 600;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  color: var(--text-secondary);
+}
+
+.hud-neighbors-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hud-neighbors-item {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 17.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 1px dashed rgba(96, 108, 56, 0.08);
+  padding-bottom: 4px;
+}
+
+.hud-neighbors-item span:last-child {
+  font-family: monospace;
+  color: var(--text-muted);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s ease-out;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 1; filter: drop-shadow(0 0 10px rgba(224, 122, 95, 0.35)); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-subtle 3s infinite ease-in-out;
+}
+
+/* Viewport Container for the 3D Canvas */
+.viewport-container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  cursor: grab;
+}
+
+.viewport-container:active {
+  cursor: grabbing;
+}
+
+/* Responsive 3D Canvas Element */
+.viewport-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+

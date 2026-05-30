@@ -10,7 +10,7 @@ export const SensorySignature: React.FC<SensorySignatureProps> = ({ sensory, isE
   return (
     <div className="search-card glass-panel sensory-signature-panel">
       <h2 className="search-card-title sensory-signature-title">
-        <span style={{ fontSize: '18px' }}>📊</span> Projected Sensory Signature
+        Projected Sensory Signature
       </h2>
       {isEmpty ? (
         <p className="sensory-signature-placeholder">

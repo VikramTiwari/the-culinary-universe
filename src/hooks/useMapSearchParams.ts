@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export function useMapSearchParams() {
+export function useMapSearchParams(alchemyActive: boolean = false) {
   const [selectedIdx, setSelectedIdx] = useState<number | null>(() => {
     const params = new URLSearchParams(window.location.search);
     const s = params.get('selected');
@@ -50,6 +50,14 @@ export function useMapSearchParams() {
   });
 
   useEffect(() => {
+    if (alchemyActive) {
+      // Instantly clear URL query parameters in alchemist lab mode for a neat /lab link
+      if (window.location.search !== '') {
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+      return;
+    }
+
     const params = new URLSearchParams(window.location.search);
     params.set('x', axisTasteX.toString());
     params.set('y', axisTasteY.toString());
@@ -65,7 +73,7 @@ export function useMapSearchParams() {
     }
     const newRelativePathQuery = window.location.pathname + '?' + params.toString();
     window.history.replaceState(null, '', newRelativePathQuery);
-  }, [axisTasteX, axisTasteY, axisTasteZ, zoom, selectedIdx, showAxes, showTethers, userWantsAutoRotate]);
+  }, [axisTasteX, axisTasteY, axisTasteZ, zoom, selectedIdx, showAxes, showTethers, userWantsAutoRotate, alchemyActive]);
 
   return {
     selectedIdx,

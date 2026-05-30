@@ -11,13 +11,14 @@ import { useVectorSearchWorker } from './useVectorSearchWorker';
 import { useCanvasAnimation } from './useCanvasAnimation';
 import { useMapSearchParams } from './useMapSearchParams';
 import { useAlchemicalCalculations } from './useAlchemicalCalculations';
+import { useAlchemicalURLSync } from './useAlchemicalURLSync';
 
 export function useVectorMathState(alchemyActive: boolean) {
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
-  // URL State Synced Params Hook
+  // URL State Synced Params Hook (Disables standard sync on lab page)
   const {
     selectedIdx,
     setSelectedIdx,
@@ -35,7 +36,7 @@ export function useVectorMathState(alchemyActive: boolean) {
     setAxisTasteY,
     axisTasteZ,
     setAxisTasteZ
-  } = useMapSearchParams();
+  } = useMapSearchParams(alchemyActive);
 
   const isComparing = selectedIdx !== null && hoveredIdx !== null && selectedIdx !== hoveredIdx;
   const primaryIdx = isComparing ? selectedIdx : (hoveredIdx !== null ? hoveredIdx : selectedIdx);
@@ -50,6 +51,16 @@ export function useVectorMathState(alchemyActive: boolean) {
   // Alchemist workspace state
   const [positives, setPositives] = useState<number[]>([]);
   const [negatives, setNegatives] = useState<number[]>([]);
+
+  // Synchronize additions and subtractions to URL query params for easy link sharing
+  useAlchemicalURLSync({
+    alchemyActive,
+    ingredients,
+    positives,
+    setPositives,
+    negatives,
+    setNegatives
+  });
 
   // Consume Web Worker logic from our custom hook
   const {
@@ -70,8 +81,8 @@ export function useVectorMathState(alchemyActive: boolean) {
   const pointCloud = useMemo(() => generatePointCloud(ingredients, umapCenterOffset), [ingredients, umapCenterOffset]);
   const [randomHighlights, setRandomHighlights] = useState<number[]>([]);
 
-  // Real-time sensory and coordinate projections for alchemist workbench
-  const { alchemicalNode, synthesizedSensory } = useAlchemicalCalculations({
+  // Real-time sensory, zoom, and coordinate projections for alchemist workbench
+  const { alchemicalNode, synthesizedSensory, dynamicZoom } = useAlchemicalCalculations({
     alchemyActive,
     positives,
     negatives,
@@ -193,6 +204,7 @@ export function useVectorMathState(alchemyActive: boolean) {
     animationRef,
     cosmicDust,
     zoom,
+    dynamicZoom,
     showAxes,
     axisTasteX,
     axisTasteY,

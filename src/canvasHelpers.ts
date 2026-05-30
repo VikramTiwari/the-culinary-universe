@@ -1,19 +1,5 @@
 import { project3DTo2D, ProjectionParams, ProjectedPoint } from './math';
-import { TASTE_NAMES } from './constants';
-
-const TASTE_RGBS: { [key: string]: string } = {
-  '#be4b34': '190, 75, 52',    // Sweet
-  '#bf9525': '191, 149, 37',   // Sour
-  '#487f65': '72, 127, 101',   // Salty
-  '#2c2f42': '44, 47, 66',     // Bitter
-  '#9a3821': '154, 56, 33',    // Umami
-  '#be3f25': '190, 63, 37',    // Spicy
-  '#355f37': '53, 95, 55',     // Herbal
-  '#437554': '67, 117, 84',    // Citrusy
-  '#474d52': '71, 77, 82',     // Smoky
-  '#b67732': '182, 119, 50',   // FattyRich
-  '#6366f1': '99, 102, 241'    // Indigo fallback
-};
+import { TASTE_NAMES, TASTE_RGBS } from './constants';
 
 export interface Star {
   x: number;
@@ -217,4 +203,96 @@ export function drawActiveNode(
   ctx.fillStyle = '#212529';
   ctx.fillText(p.name, labelX, labelY);
   ctx.globalAlpha = 1.0;
+}
+
+export function drawAlchemicalTethers(
+  ctx: CanvasRenderingContext2D,
+  alchemicalNode: any,
+  projected: CanvasProjectedPoint[],
+  projectionParams: ProjectionParams,
+  zoom: number,
+  singleElementIdx: number | null,
+  frame: number
+) {
+  if (!alchemicalNode) return;
+  const { px, py, scale } = project3DTo2D(alchemicalNode, { ...projectionParams, zoom });
+
+  // 1. Draw glowing green lines to positive nodes with flowing fusion sparks
+  if (alchemicalNode.positives.length + alchemicalNode.negatives.length >= 2) {
+    ctx.lineWidth = 1.8;
+    ctx.strokeStyle = 'rgba(53, 95, 55, 0.45)'; // positive tethers (Rosemary Forest Green)
+    ctx.setLineDash([3, 3]);
+    alchemicalNode.positives.forEach((idx: number, posIdx: number) => {
+      const p = projected.find((item) => item.index === idx);
+      if (p) {
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        ctx.lineTo(p.px, p.py);
+        ctx.stroke();
+
+        // Energy spark flowing from ingredient star into the supernova compound core
+        const t = ((frame * 0.02) + posIdx * 0.3) % 1.0;
+        const sparkX = p.px * (1.0 - t) + px * t;
+        const sparkY = p.py * (1.0 - t) + py * t;
+        ctx.beginPath();
+        ctx.arc(sparkX, sparkY, 3.8 * scale, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(72, 127, 101, 0.9)'; // Sweet emerald glow
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(sparkX, sparkY, 1.8 * scale, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+      }
+    });
+
+    // 2. Draw glowing red lines to negative nodes with flowing fusion sparks
+    ctx.strokeStyle = 'rgba(190, 75, 52, 0.45)'; // negative tethers (Ripe Strawberry Red)
+    alchemicalNode.negatives.forEach((idx: number, negIdx: number) => {
+      const p = projected.find((item) => item.index === idx);
+      if (p) {
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        ctx.lineTo(p.px, p.py);
+        ctx.stroke();
+
+        // Energy spark flowing from excluded node into the supernova core
+        const t = ((frame * 0.02) + negIdx * 0.3) % 1.0;
+        const sparkX = p.px * (1.0 - t) + px * t;
+        const sparkY = p.py * (1.0 - t) + py * t;
+        ctx.beginPath();
+        ctx.arc(sparkX, sparkY, 3.8 * scale, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(190, 75, 52, 0.9)'; // Spicy ruby glow
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(sparkX, sparkY, 1.8 * scale, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+      }
+    });
+    ctx.setLineDash([]);
+  }
+
+  // 3. Draw tethers connecting to the nearest matches (sage accent)
+  ctx.lineWidth = 1.2;
+  ctx.strokeStyle = 'rgba(96, 108, 56, 0.45)'; // standard tethers (Aromatic Sage Accent)
+  ctx.fillStyle = 'rgba(33, 37, 41, 0.95)';
+  ctx.font = 'italic 700 15px "Cormorant Garamond", Georgia, serif';
+  ctx.setLineDash([3, 3]);
+
+  alchemicalNode.searchResults.slice(0, 10).forEach((res: { index: number; score: number }) => {
+    const p = projected.find((item) => item.index === res.index);
+    if (p) {
+      // Don't draw a tether to the active element itself
+      if (p.index === singleElementIdx) return;
+
+      ctx.beginPath();
+      ctx.moveTo(px, py);
+      ctx.lineTo(p.px, p.py);
+      ctx.stroke();
+
+      const text = `${p.name} (${Math.max(0, 100 - res.score * 0.15).toFixed(0)}%)`;
+      ctx.fillText(text, p.px + 7, p.py + 4);
+    }
+  });
+  ctx.setLineDash([]);
 }

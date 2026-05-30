@@ -8,6 +8,7 @@ interface CanvasAnimationProps {
   animationRef: React.MutableRefObject<number | null>;
   cosmicDust: any[];
   zoom: number;
+  dynamicZoom?: number;
   showAxes: boolean;
   axisTasteX: number;
   axisTasteY: number;
@@ -38,6 +39,7 @@ export function useCanvasAnimation({
   animationRef,
   cosmicDust,
   zoom,
+  dynamicZoom,
   showAxes,
   axisTasteX,
   axisTasteY,
@@ -71,9 +73,18 @@ export function useCanvasAnimation({
     canvas.height = height * dpr;
     ctx.scale(dpr, dpr);
     let frame = 0;
+    
+    // Scoped closure variable to track current active zoom level smoothly
+    let currentZoom = zoom;
+
     const render = () => {
       ctx.clearRect(0, 0, width, height);
       frame++;
+      
+      // Calculate dynamic alchemical target zoom or fallback to basic zoom
+      const targetZoom = alchemyActive && dynamicZoom !== undefined ? dynamicZoom : zoom;
+      currentZoom += (targetZoom - currentZoom) * 0.05;
+
       if (currentCoordsRef.current.length !== pointCloud.length) {
         currentCoordsRef.current = pointCloud.map((p) => ({ x: p.x, y: p.y, z: p.z }));
       }
@@ -96,7 +107,8 @@ export function useCanvasAnimation({
           angleYRef.current = targetAngleYRef.current;
           cancelTargetTransition();
         }
-      } else if (!isDragging.current && autoRotate) {
+      } else if (!isDragging.current && autoRotate && !alchemyActive) {
+        // Enforce: absolutely no auto rotation on the lab page
         angleYRef.current += 0.0012;
         angleXRef.current += Math.sin(frame * 0.006) * 0.0006;
       }
@@ -108,7 +120,7 @@ export function useCanvasAnimation({
 
       projectedPointsRef.current = drawScene({
         ctx, pointCloud, currentCoords: currentCoordsRef.current, cosmicDust,
-        projectionParams, zoom, showAxes, axisTasteX, axisTasteY, axisTasteZ,
+        projectionParams, zoom: currentZoom, showAxes, axisTasteX, axisTasteY, axisTasteZ,
         showTethers, primaryIdx, isComparing, selectedIdx, hoveredIdx, frame,
         randomHighlights,
         alchemicalNode,
@@ -122,7 +134,7 @@ export function useCanvasAnimation({
     };
   }, [
     pointCloud, hoveredIdx, selectedIdx, showAxes, showTethers, autoRotate,
-    zoom, axisTasteX, axisTasteY, axisTasteZ, tasteMeans, cosmicDust,
+    zoom, dynamicZoom, axisTasteX, axisTasteY, axisTasteZ, tasteMeans, cosmicDust,
     randomHighlights, alchemyActive, alchemicalNode, isComparing, primaryIdx
   ]);
 }

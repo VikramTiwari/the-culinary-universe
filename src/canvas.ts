@@ -1,6 +1,20 @@
 import { project3DTo2D, ProjectionParams, ProjectedPoint } from './math';
 import { TASTE_NAMES } from './constants';
 
+const TASTE_RGBS: { [key: string]: string } = {
+  '#be4b34': '190, 75, 52',    // Sweet
+  '#bf9525': '191, 149, 37',   // Sour
+  '#487f65': '72, 127, 101',   // Salty
+  '#2c2f42': '44, 47, 66',     // Bitter
+  '#9a3821': '154, 56, 33',    // Umami
+  '#be3f25': '190, 63, 37',    // Spicy
+  '#355f37': '53, 95, 55',     // Herbal
+  '#437554': '67, 117, 84',    // Citrusy
+  '#474d52': '71, 77, 82',     // Smoky
+  '#b67732': '182, 119, 50',   // FattyRich
+  '#6366f1': '99, 102, 241'    // Indigo fallback
+};
+
 export interface Star {
   x: number;
   y: number;
@@ -59,16 +73,17 @@ export function drawAxes(
     { x: 0, y: 0, z: 220, color: '#212529', label: labelZ }
   ];
 
+  ctx.font = 'italic 700 16px "Cormorant Garamond", Georgia, serif';
+  ctx.fillStyle = '#212529';
+  ctx.strokeStyle = '#212529';
+
   axes.forEach((axis) => {
     const { px, py } = project3DTo2D(axis, { ...params, zoom });
     ctx.beginPath();
     ctx.moveTo(params.centerX, params.centerY);
     ctx.lineTo(px, py);
-    ctx.strokeStyle = axis.color;
     ctx.stroke();
 
-    ctx.fillStyle = axis.color;
-    ctx.font = 'italic 700 16px "Cormorant Garamond", Georgia, serif';
     ctx.fillText(axis.label, px + 6, py + 4);
   });
 }
@@ -85,10 +100,13 @@ export function drawNeighborsTethers(ctx: CanvasRenderingContext2D, projected: C
     });
 
   tethers.sort((a, b) => a.dist - b.dist);
+  ctx.lineWidth = 1.0;
+  ctx.strokeStyle = 'rgba(96, 108, 56, 0.35)';
+  ctx.fillStyle = 'rgba(33, 37, 41, 0.75)';
+  ctx.font = 'italic 500 15px "Cormorant Garamond", Georgia, serif';
+
   tethers.slice(0, 3).forEach((t) => {
     ctx.globalAlpha = 0.55 * t.node.scale;
-    ctx.lineWidth = 1.0;
-    ctx.strokeStyle = 'rgba(96, 108, 56, 0.35)';
     ctx.setLineDash([3, 4]);
 
     ctx.beginPath();
@@ -97,8 +115,6 @@ export function drawNeighborsTethers(ctx: CanvasRenderingContext2D, projected: C
     ctx.stroke();
     ctx.setLineDash([]);
 
-    ctx.fillStyle = 'rgba(33, 37, 41, 0.75)';
-    ctx.font = 'italic 500 15px "Cormorant Garamond", Georgia, serif';
     ctx.fillText(t.node.name, t.node.px + 7, t.node.py + 4);
   });
   ctx.globalAlpha = 1.0;
@@ -131,23 +147,13 @@ export function drawStandardParticles(
     const radius = Math.max(0.5, 2.8 * p.scale);
     const opacity = Math.min(Math.max((p.scale - 0.25) * 1.5, 0.04), 0.85);
 
-    ctx.globalAlpha = opacity;
     ctx.beginPath();
     ctx.arc(p.px, p.py, radius, 0, Math.PI * 2);
 
-    if (p.color2) {
-      const grad = ctx.createLinearGradient(p.px - radius, p.py - radius, p.px + radius, p.py + radius);
-      grad.addColorStop(0, p.color);
-      grad.addColorStop(0.5, p.color);
-      grad.addColorStop(0.5, p.color2);
-      grad.addColorStop(1, p.color2);
-      ctx.fillStyle = grad;
-    } else {
-      ctx.fillStyle = p.color;
-    }
+    const rgb = TASTE_RGBS[p.color] || '99, 102, 241';
+    ctx.fillStyle = `rgba(${rgb}, ${opacity.toFixed(3)})`;
     ctx.fill();
   });
-  ctx.globalAlpha = 1.0;
 }
 
 export function drawActiveNode(

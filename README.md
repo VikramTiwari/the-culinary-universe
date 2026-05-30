@@ -1,6 +1,6 @@
 # The Flavor Explorer: Journey into the Culinary Universe
 
-[![GitHub Pages](https://img.shields.io/badge/status-live%20on%20gh--pages-success?style=for-the-badge&logo=github&color=606c38)](https://VikramTiwari.github.io/the-culinary-universe)
+[![Live App](https://img.shields.io/badge/status-live%20on%20custom%20domain-success?style=for-the-badge&logo=google-cloud&color=606c38)](https://culinary-universe.vikramtiwari.com)
 [![Scientific Foundation](https://img.shields.io/badge/arXiv-2605.22391-B31B1B?style=for-the-badge&logo=arxiv)](https://arxiv.org/pdf/2605.22391)
 
 > "Is a carrot closer to a parsnip or a coriander seed? In a 300-dimensional culinary universe, flavor is not an opinion—it is a coordinates system."
@@ -106,17 +106,21 @@ make build
 
 ---
 
-## 🚀 Deployed on GitHub Pages
+## 🚀 Deployed on GitHub Pages & Firebase Hosting (Custom Domain)
 
-The project is fully optimized for GitHub Pages. You can build and deploy the production bundle to your `gh-pages` branch with a single command:
+The project is fully optimized for zero-overhead static hosting on both platforms. You can compile production assets and deploy them simultaneously to both targets with a single Terminal command:
 
 ```bash
 make deploy
 ```
 *(Or `npm run deploy`)*
 
+### Live Deployments:
+* 🌐 **Custom Branded Domain (Firebase CDN)**: [culinary-universe.vikramtiwari.com](https://culinary-universe.vikramtiwari.com)
+* 🐙 **GitHub Pages CDN Mirror**: [vikramtiwari.github.io/the-culinary-universe](https://vikramtiwari.github.io/the-culinary-universe/)
+
 ### Asset Pipeline Summary
-To conform to the lightweight requirements of GitHub Pages and prevent hosting large source datasets that can be retrieved directly from Hugging Face, our build pipeline behaves as follows:
+To conform to the lightweight requirements of GitHub Pages and Firebase, and prevent hosting large source datasets that can be retrieved directly from Hugging Face, our build pipeline behaves as follows:
 * **`public/ingredients.json` (~448 KB)** is compiled and packaged in `dist/`.
 * **`data/epicure_core.csv` (5.1 MB)** and **`data/dataset.bin` (2.1 MB)** are ignored by Git and excluded from the production build, leaving a lightning-fast, ultra-accessible static app.
 * **Relative Base Paths**: Vite and the React fetch client use relative paths (`./`) so that the application operates flawlessly under any sub-path directory configuration without breaking static links.

@@ -10,6 +10,7 @@ import {
   CanvasProjectedPoint
 } from './canvasHelpers';
 import { DrawSceneOptions } from './types';
+import { TASTE_COLORS } from './constants';
 
 // Helper to convert hex taste colors to rgba with transparency
 function hexToRgba(hex: string, alpha: number): string {
@@ -54,18 +55,12 @@ export function drawScene(options: DrawSceneOptions) {
     return { ...p, px, py, scale, rz, x: coords.x, y: coords.y, z: coords.z };
   });
 
-  // Filter UMAP stars in Alchemy Lab Mode (Focus Constellation)
-  if (alchemyActive) {
-    if (alchemicalNode) {
-      const activeSet = new Set<number>();
-      alchemicalNode.positives.forEach((idx) => activeSet.add(idx));
-      alchemicalNode.negatives.forEach((idx) => activeSet.add(idx));
-      alchemicalNode.searchResults.slice(0, 10).forEach((res) => activeSet.add(res.index));
-      projected = projected.filter((p) => activeSet.has(p.index));
-    } else {
-      // Empty formulation board in alchemist lab mode: show zero stars!
-      projected = [];
-    }
+  // Identify all active alchemical elements to highlight as active nodes in space
+  const alchemicalActiveSet = new Set<number>();
+  if (alchemyActive && alchemicalNode) {
+    alchemicalNode.positives.forEach((idx) => alchemicalActiveSet.add(idx));
+    alchemicalNode.negatives.forEach((idx) => alchemicalActiveSet.add(idx));
+    alchemicalNode.searchResults.slice(0, 10).forEach((res) => alchemicalActiveSet.add(res.index));
   }
 
   projected.sort((a, b) => b.rz - a.rz);
@@ -77,12 +72,20 @@ export function drawScene(options: DrawSceneOptions) {
 
   const currentSelectedIdx = selectedIdx !== null ? selectedIdx : singleElementIdx;
 
-  if (showAxes) drawAxes(ctx, projectionParams, axisTasteX, axisTasteY, axisTasteZ, zoom);
-  if (showTethers && primaryIdx !== null) drawNeighborsTethers(ctx, projected, primaryIdx);
+  if (showAxes && !alchemyActive) drawAxes(ctx, projectionParams, axisTasteX, axisTasteY, axisTasteZ, zoom);
+  if (showTethers && primaryIdx !== null && !alchemyActive) drawNeighborsTethers(ctx, projected, primaryIdx);
 
   // Draw Alchemical connection and neighbor matches tethers dynamically via helpers module
   if (alchemicalNode) {
-    drawAlchemicalTethers(ctx, alchemicalNode, projected, projectionParams, zoom, singleElementIdx, frame);
+    drawAlchemicalTethers(
+      ctx,
+      alchemicalNode,
+      projected,
+      projectionParams,
+      zoom,
+      singleElementIdx,
+      frame
+    );
   }
 
   if (isComparing && currentSelectedIdx !== null && hoveredIdx !== null) {
@@ -91,20 +94,34 @@ export function drawScene(options: DrawSceneOptions) {
     if (pX && pY) drawComparisonTether(ctx, pX, pY);
   }
 
-  drawStandardParticles(ctx, projected, currentSelectedIdx, hoveredIdx, randomHighlights);
+  drawStandardParticles(
+    ctx,
+    projected,
+    currentSelectedIdx,
+    hoveredIdx,
+    randomHighlights,
+    alchemyActive,
+    alchemicalActiveSet
+  );
 
-  // Draw all positive and negative workbench ingredient nodes as highlighted active nodes with original home colors
+  // Draw all positive, negative, and search result matching nodes as highlighted active nodes with their original home colors
   if (alchemyActive && alchemicalNode) {
     alchemicalNode.positives.forEach((idx) => {
       if (idx === currentSelectedIdx || idx === hoveredIdx) return;
       const p = projected.find((item) => item.index === idx);
-      if (p) drawActiveNode(ctx, p, frame, false, false);
+      if (p) drawActiveNode(ctx, p, frame, false, false, true);
     });
 
     alchemicalNode.negatives.forEach((idx) => {
       if (idx === currentSelectedIdx || idx === hoveredIdx) return;
       const p = projected.find((item) => item.index === idx);
-      if (p) drawActiveNode(ctx, p, frame, true, false);
+      if (p) drawActiveNode(ctx, p, frame, true, false, true);
+    });
+
+    alchemicalNode.searchResults.slice(0, 10).forEach((res) => {
+      if (res.index === currentSelectedIdx || res.index === hoveredIdx) return;
+      const p = projected.find((item) => item.index === res.index);
+      if (p) drawActiveNode(ctx, p, frame, false, false, false);
     });
   }
 
@@ -115,16 +132,18 @@ export function drawScene(options: DrawSceneOptions) {
   });
 
   if (currentSelectedIdx !== null) {
-    const p = projected.find((item) => item.index === currentSelectedIdx);
-    if (p) drawActiveNode(ctx, p, frame, false, false);
+    if (!(alchemyActive && currentSelectedIdx === singleElementIdx)) {
+      const p = projected.find((item) => item.index === currentSelectedIdx);
+      if (p) drawActiveNode(ctx, p, frame, false, false);
+    }
   }
   if (hoveredIdx !== null && hoveredIdx !== currentSelectedIdx) {
     const p = projected.find((item) => item.index === hoveredIdx);
     if (p) drawActiveNode(ctx, p, frame, true, false);
   }
 
-  // Draw Alchemical Supernova Node Core on top (Only if there are 2 or more elements)
-  if (alchemicalNode && alchemicalNode.positives.length + alchemicalNode.negatives.length >= 2) {
+  // Draw Alchemical Supernova Node Core on top (Only if there is 1 or more elements)
+  if (alchemicalNode && alchemicalNode.positives.length + alchemicalNode.negatives.length >= 1) {
     const translatedAlchemicalNode = {
       x: alchemicalNode.x - centerOfSpace.x,
       y: alchemicalNode.y - centerOfSpace.y,
@@ -135,14 +154,51 @@ export function drawScene(options: DrawSceneOptions) {
     const radius = Math.max(1.0, baseRadius * scale);
     const pulse = (frame % 60) / 60;
     
-    // Dynamically retrieve the sensory-reactive color signature
-    const dominantColor = alchemicalNode.dominantColor || '#bf9525';
+    // Mathematically blend constituent flavor colors based on their active weights in the synthesized sensory profile
+    const activeFlavors: { color: string; weight: number }[] = [];
+    if (alchemicalNode.sensory) {
+      alchemicalNode.sensory.forEach((val, idx) => {
+        if (val > 0.02) {
+          const color = TASTE_COLORS[idx] || '#bf9525';
+          activeFlavors.push({ color, weight: val });
+        }
+      });
+    }
 
-    // Glowing shell 1 (Primary - Dominant Taste Reactive Color)
+    let blendedR = 0, blendedG = 0, blendedB = 0, totalWeight = 0;
+    activeFlavors.forEach(({ color, weight }) => {
+      const r = parseInt(color.slice(1, 3), 16);
+      const g = parseInt(color.slice(3, 5), 16);
+      const b = parseInt(color.slice(5, 7), 16);
+      blendedR += r * weight;
+      blendedG += g * weight;
+      blendedB += b * weight;
+      totalWeight += weight;
+    });
+
+    let mixedColor = '#bf9525';
+    if (totalWeight > 0) {
+      const finalR = Math.round(blendedR / totalWeight);
+      const finalG = Math.round(blendedG / totalWeight);
+      const finalB = Math.round(blendedB / totalWeight);
+      mixedColor = '#' + [finalR, finalG, finalB].map(v => {
+        const hex = v.toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
+      }).join('');
+    }
+
+    // Sort constituent active flavors by strength descending to build a beautiful multi-flavor gradient in the core
+    const sortedFlavors = [...activeFlavors].sort((a, b) => b.weight - a.weight);
+    const constituentFlavorColors = sortedFlavors.slice(0, 3).map(f => f.color);
+    if (constituentFlavorColors.length === 0) {
+      constituentFlavorColors.push('#bf9525');
+    }
+
+    // Glowing shell 1 (Primary - Weighted Blended Taste Reactive Color)
     ctx.globalAlpha = 0.85 - pulse;
     ctx.beginPath();
     ctx.arc(px, py, radius * (1.0 + pulse * 1.8), 0, Math.PI * 2);
-    ctx.strokeStyle = dominantColor;
+    ctx.strokeStyle = mixedColor;
     ctx.lineWidth = 2.5;
     ctx.stroke();
 
@@ -156,34 +212,41 @@ export function drawScene(options: DrawSceneOptions) {
     ctx.stroke();
     ctx.globalAlpha = 1.0; // Reset global alpha
 
-    // Inner deep radial glow (Dominant Taste Reactive)
+    // Inner deep radial glow (Weighted Blended Taste Reactive Color)
     ctx.beginPath();
     ctx.arc(px, py, radius * 3.5, 0, Math.PI * 2);
     const glowGrad = ctx.createRadialGradient(px, py, 2, px, py, radius * 3.5);
-    glowGrad.addColorStop(0, hexToRgba(dominantColor, 0.35));
-    glowGrad.addColorStop(0.5, hexToRgba(dominantColor, 0.1));
-    glowGrad.addColorStop(1, hexToRgba(dominantColor, 0.0));
+    glowGrad.addColorStop(0, hexToRgba(mixedColor, 0.35));
+    glowGrad.addColorStop(0.5, hexToRgba(mixedColor, 0.1));
+    glowGrad.addColorStop(1, hexToRgba(mixedColor, 0.0));
     ctx.fillStyle = glowGrad;
     ctx.fill();
 
-    // Solid core with linear alchemist gradient (Honey gold to dominant taste reactive color)
+    // Solid core with linear alchemist gradient blending dominant active flavor colors!
     ctx.beginPath();
     ctx.arc(px, py, radius, 0, Math.PI * 2);
     const coreGrad = ctx.createLinearGradient(px - radius, py - radius, px + radius, py + radius);
-    coreGrad.addColorStop(0, '#bf9525'); 
-    coreGrad.addColorStop(1, dominantColor); 
+    if (constituentFlavorColors.length === 1) {
+      coreGrad.addColorStop(0, '#bf9525'); 
+      coreGrad.addColorStop(1, constituentFlavorColors[0]); 
+    } else {
+      constituentFlavorColors.forEach((color, idx) => {
+        const stop = idx / (constituentFlavorColors.length - 1);
+        coreGrad.addColorStop(stop, color);
+      });
+    }
     ctx.fillStyle = coreGrad;
     ctx.fill();
 
-    // Orbiting orbital cosmic sparks for stunning 3D depth and focal authority
+    // Orbiting orbital cosmic sparks matching constituent flavor colors for beautiful interactive depth
     for (let i = 0; i < 5; i++) {
       const angle = (frame * 0.035) + (i * (Math.PI * 2 / 5));
       const rx = Math.cos(angle) * (radius * 2.4);
       const ry = Math.sin(angle) * (radius * 1.4); // Elliptical distortion
       ctx.beginPath();
       ctx.arc(px + rx, py + ry, 2.8 * scale, 0, Math.PI * 2);
-      ctx.fillStyle = i % 2 === 0 ? '#bf9525' : dominantColor;
-      ctx.shadowColor = dominantColor;
+      ctx.fillStyle = constituentFlavorColors[i % constituentFlavorColors.length];
+      ctx.shadowColor = mixedColor;
       ctx.shadowBlur = 8;
       ctx.fill();
     }
@@ -203,20 +266,25 @@ export function drawScene(options: DrawSceneOptions) {
     ctx.lineWidth = 1.0;
     ctx.stroke();
 
-    // Alchemical name tag with heavy text outline
-    const labelX = px + radius + 12;
+    const labelText = (alchemyActive && singleElementIdx !== null)
+      ? (pointCloud.find((item) => item.index === singleElementIdx)?.name || 'Synthesized Compound')
+      : 'Synthesized Compound';
+
+    // Render clean text label positioned next to the alchemical node core
+    const labelX = px + radius + 15;
     const labelY = py + 5;
     ctx.font = 'bold italic 20px "Cormorant Garamond", Georgia, serif';
     ctx.textAlign = 'left';
 
     ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.fillText('🔮 Synthesized Compound', labelX - 1.5, labelY - 1.5);
-    ctx.fillText('🔮 Synthesized Compound', labelX + 1.5, labelY - 1.5);
-    ctx.fillText('🔮 Synthesized Compound', labelX - 1.5, labelY + 1.5);
-    ctx.fillText('🔮 Synthesized Compound', labelX + 1.5, labelY + 1.5);
+    [-1.5, 1.5].forEach((dx) => {
+      [-1.5, 1.5].forEach((dy) => {
+        ctx.fillText(labelText, labelX + dx, labelY + dy);
+      });
+    });
 
-    ctx.fillStyle = dominantColor; // Glowing dominant alchemist taste color
-    ctx.fillText('🔮 Synthesized Compound', labelX, labelY);
+    ctx.fillStyle = mixedColor; // Glowing dominant alchemist taste color
+    ctx.fillText(labelText, labelX, labelY);
   }
 
   return projected.map((p) => ({ index: p.index, px: p.px, py: p.py }));

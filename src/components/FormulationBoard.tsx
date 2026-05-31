@@ -16,17 +16,10 @@ interface FormulationBoardProps {
 }
 
 export const FormulationBoard: React.FC<FormulationBoardProps> = ({
-  positives,
-  negatives,
-  ingredients,
-  onAddPositive,
-  onRemovePositive,
-  onAddNegative,
-  onRemoveNegative,
-  workerState,
-  workerError,
+  positives, negatives, ingredients,
+  onAddPositive, onRemovePositive, onAddNegative, onRemoveNegative,
+  workerState, workerError,
 }) => {
-  // Autocomplete inputs state
   const [posInput, setPosInput] = useState('');
   const [negInput, setNegInput] = useState('');
   const [showPosDropdown, setShowPosDropdown] = useState(false);
@@ -37,79 +30,61 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
   const posInputRef = useRef<HTMLInputElement>(null);
   const negInputRef = useRef<HTMLInputElement>(null);
 
-  // Click-Outside triggers to close dropdowns
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
-      if (posInputRef.current && !posInputRef.current.contains(e.target as Node)) {
-        setShowPosDropdown(false);
-      }
-      if (negInputRef.current && !negInputRef.current.contains(e.target as Node)) {
-        setShowNegDropdown(false);
-      }
+      if (posInputRef.current && !posInputRef.current.contains(e.target as Node)) setShowPosDropdown(false);
+      if (negInputRef.current && !negInputRef.current.contains(e.target as Node)) setShowNegDropdown(false);
     };
     document.addEventListener('mousedown', handleOutsideClick);
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, []);
 
-  // Filtering metadata based on autocomplete inputs
-  const filteredPosSuggestions = useMemo(() => {
-    if (!posInput.trim()) return [];
-    const query = posInput.toLowerCase();
+  const getFilteredSuggestions = (input: string, excluded: number[]) => {
+    if (!input.trim()) return [];
+    const query = input.toLowerCase();
     return ingredients
       .map((ing, originalIndex) => ({ ...ing, originalIndex }))
-      .filter((ing) => ing.name.toLowerCase().includes(query) && !positives.includes(ing.originalIndex) && !negatives.includes(ing.originalIndex))
+      .filter((ing) => ing.name.toLowerCase().includes(query) && !excluded.includes(ing.originalIndex))
       .slice(0, 6);
-  }, [posInput, ingredients, positives, negatives]);
+  };
 
-  const filteredNegSuggestions = useMemo(() => {
-    if (!negInput.trim()) return [];
-    const query = negInput.toLowerCase();
-    return ingredients
-      .map((ing, originalIndex) => ({ ...ing, originalIndex }))
-      .filter((ing) => ing.name.toLowerCase().includes(query) && !positives.includes(ing.originalIndex) && !negatives.includes(ing.originalIndex))
-      .slice(0, 6);
-  }, [negInput, ingredients, positives, negatives]);
+  const filteredPosSuggestions = useMemo(
+    () => getFilteredSuggestions(posInput, [...positives, ...negatives]),
+    [posInput, ingredients, positives, negatives]
+  );
 
-  // Keyboard navigation inside dropdown inputs
-  const handlePosKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!filteredPosSuggestions.length) return;
+  const filteredNegSuggestions = useMemo(
+    () => getFilteredSuggestions(negInput, [...positives, ...negatives]),
+    [negInput, ingredients, positives, negatives]
+  );
+
+  const handleDropdownKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    suggestions: any[],
+    activeIndex: number,
+    setActiveIndex: React.Dispatch<React.SetStateAction<number>>,
+    onAdd: (idx: number) => void,
+    setInput: React.Dispatch<React.SetStateAction<string>>,
+    setShowDropdown: React.Dispatch<React.SetStateAction<boolean>>
+  ) => {
+    if (!suggestions.length) return;
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setPosActiveIndex((prev) => (prev + 1) % filteredPosSuggestions.length);
+      setActiveIndex((prev) => (prev + 1) % suggestions.length);
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setPosActiveIndex((prev) => (prev - 1 + filteredPosSuggestions.length) % filteredPosSuggestions.length);
+      setActiveIndex((prev) => (prev - 1 + suggestions.length) % suggestions.length);
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      onAddPositive(filteredPosSuggestions[posActiveIndex].originalIndex);
-      setPosInput('');
-      setShowPosDropdown(false);
-      setPosActiveIndex(0);
+      onAdd(suggestions[activeIndex].originalIndex);
+      setInput('');
+      setShowDropdown(false);
+      setActiveIndex(0);
     } else if (e.key === 'Escape') {
-      setShowPosDropdown(false);
+      setShowDropdown(false);
     }
   };
 
-  const handleNegKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!filteredNegSuggestions.length) return;
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      setNegActiveIndex((prev) => (prev + 1) % filteredNegSuggestions.length);
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      setNegActiveIndex((prev) => (prev - 1 + filteredNegSuggestions.length) % filteredNegSuggestions.length);
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      onAddNegative(filteredNegSuggestions[negActiveIndex].originalIndex);
-      setNegInput('');
-      setShowNegDropdown(false);
-      setNegActiveIndex(0);
-    } else if (e.key === 'Escape') {
-      setShowNegDropdown(false);
-    }
-  };
-
-  // Find dominant taste labels for autocomplete suggestions
   const getDominantTastes = (sensory: number[]) => {
     return sensory
       .map((val, idx) => ({ name: TASTE_NAMES[idx], color: TASTE_COLORS[idx], val }))
@@ -142,12 +117,11 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
 
         {workerState === 'ready' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {/* Autocomplete rows side-by-side */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
               {/* Left Column: Add Positives */}
               <div className="search-input-group" ref={posInputRef}>
                 <label className="search-input-label" style={{ color: 'var(--color-herbal)' }}>
-                  <span>➕</span> Base Profiles (Add Base Notes)
+                  <span>➕</span> Base Profiles
                 </label>
                 <div className="search-field-container">
                   <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5, fontSize: '12px' }}>🔍</span>
@@ -164,7 +138,10 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
                       setPosActiveIndex(0);
                     }}
                     onFocus={() => setShowPosDropdown(true)}
-                    onKeyDown={handlePosKeyDown}
+                    onKeyDown={(e) => handleDropdownKeyDown(
+                      e, filteredPosSuggestions, posActiveIndex, setPosActiveIndex,
+                      onAddPositive, setPosInput, setShowPosDropdown
+                    )}
                   />
 
                   {showPosDropdown && filteredPosSuggestions.length > 0 && (
@@ -207,9 +184,7 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
                     return (
                       <span key={idx} className="ingredient-chip positive" style={{ padding: '3px 8px', fontSize: '11px' }}>
                         {ing.name}
-                        <button className="chip-remove-btn" onClick={() => onRemovePositive(idx)}>
-                          ×
-                        </button>
+                        <button className="chip-remove-btn" onClick={() => onRemovePositive(idx)}>×</button>
                       </span>
                     );
                   })}
@@ -219,7 +194,7 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
               {/* Right Column: Add Negatives */}
               <div className="search-input-group" ref={negInputRef}>
                 <label className="search-input-label" style={{ color: 'var(--color-sweet)' }}>
-                  <span>➖</span> Exclude Notes (Subtract/Repel)
+                  <span>➖</span> Exclude Notes
                 </label>
                 <div className="search-field-container">
                   <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5, fontSize: '12px' }}>🔍</span>
@@ -236,7 +211,10 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
                       setNegActiveIndex(0);
                     }}
                     onFocus={() => setShowNegDropdown(true)}
-                    onKeyDown={handleNegKeyDown}
+                    onKeyDown={(e) => handleDropdownKeyDown(
+                      e, filteredNegSuggestions, negActiveIndex, setNegActiveIndex,
+                      onAddNegative, setNegInput, setShowNegDropdown
+                    )}
                   />
 
                   {showNegDropdown && filteredNegSuggestions.length > 0 && (
@@ -279,9 +257,7 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
                     return (
                       <span key={idx} className="ingredient-chip negative" style={{ padding: '3px 8px', fontSize: '11px' }}>
                         {ing.name}
-                        <button className="chip-remove-btn" onClick={() => onRemoveNegative(idx)}>
-                          ×
-                        </button>
+                        <button className="chip-remove-btn" onClick={() => onRemoveNegative(idx)}>×</button>
                       </span>
                     );
                   })}
@@ -289,7 +265,6 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
               </div>
             </div>
 
-            {/* Mathematical Equation display */}
             <VectorEquation positives={positives} negatives={negatives} ingredients={ingredients} />
           </div>
         )}

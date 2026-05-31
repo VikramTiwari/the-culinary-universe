@@ -95,16 +95,21 @@ export function useAlchemicalCalculations({
       }
     });
 
+    const filteredSearchResults = searchResults.filter(
+      (res) => !positives.includes(res.index) && !negatives.includes(res.index)
+    );
+
     return {
       x,
       y,
       z,
       positives,
       negatives,
-      searchResults,
-      dominantColor: dominantTasteColor
+      searchResults: filteredSearchResults,
+      dominantColor: dominantTasteColor,
+      sensory: synthesizedSensory
     };
-  }, [alchemyActive, positives, negatives, pointCloud, searchResults, dominantTasteColor]);
+  }, [alchemyActive, positives, negatives, pointCloud, searchResults, dominantTasteColor, synthesizedSensory]);
 
   // Calculate dynamic alchemical camera zoom based on coordinate spread
   const dynamicZoom = useMemo(() => {

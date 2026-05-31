@@ -121,6 +121,7 @@ export function useVectorMathState(alchemyActive: boolean) {
   });
 
   const hasAutofocusedRef = useRef(false);
+  const hasOrientedRef = useRef(false);
 
   // Autofocus camera on the selected node on load
   useEffect(() => {
@@ -136,21 +137,31 @@ export function useVectorMathState(alchemyActive: boolean) {
     }
   }, [pointCloud, selectedIdx]);
 
-  // Keep alchemical compound front and center in alchemist lab mode
+  // Keep alchemical compound front and center in alchemist lab mode (only once on initial compound formation)
   useEffect(() => {
     if (alchemyActive && alchemicalNode) {
-      setAutoRotate(false);
-      resetInactivityTimer();
-      targetAngleYRef.current = -Math.atan2(alchemicalNode.x, alchemicalNode.z);
-      targetAngleXRef.current = Math.atan2(alchemicalNode.y, Math.sqrt(alchemicalNode.x * alchemicalNode.x + alchemicalNode.z * alchemicalNode.z));
+      if (!hasOrientedRef.current) {
+        hasOrientedRef.current = true;
+        setAutoRotate(false);
+        resetInactivityTimer();
+        targetAngleYRef.current = -Math.atan2(alchemicalNode.x, alchemicalNode.z);
+        targetAngleXRef.current = Math.atan2(alchemicalNode.y, Math.sqrt(alchemicalNode.x * alchemicalNode.x + alchemicalNode.z * alchemicalNode.z));
+      }
+    } else if (!alchemicalNode) {
+      hasOrientedRef.current = false;
     }
   }, [alchemyActive, alchemicalNode]);
 
+  // Synchronize dynamic alchemical zoom to the zoom state when ingredients change
+  useEffect(() => {
+    if (alchemyActive && dynamicZoom !== undefined) {
+      setZoom(dynamicZoom);
+    }
+  }, [alchemyActive, dynamicZoom, setZoom]);
+
   // Force disable autoRotate when alchemist lab mode becomes active
   useEffect(() => {
-    if (alchemyActive) {
-      setAutoRotate(false);
-    }
+    if (alchemyActive) setAutoRotate(false);
   }, [alchemyActive]);
 
   useEffect(() => {
@@ -180,19 +191,13 @@ export function useVectorMathState(alchemyActive: boolean) {
   }, [autoRotate, pointCloud.length, alchemyActive]);
 
   useEffect(() => {
-    if (primaryIdx === null || pointCloud.length === 0 || alchemyActive) {
-      setHoveredNeighbors([]);
-      return;
-    }
+    if (primaryIdx === null || pointCloud.length === 0 || alchemyActive) return setHoveredNeighbors([]);
     const target = pointCloud[primaryIdx];
     if (!target) return;
     const candidates = pointCloud
       .filter((p) => p.index !== primaryIdx)
-      .map((p) => {
-        const dx = p.x - target.x, dy = p.y - target.y, dz = p.z - target.z;
-        return { name: p.name, score: Math.sqrt(dx * dx + dy * dy + dz * dz) };
-      });
-    candidates.sort((a, b) => a.score - b.score);
+      .map((p) => ({ name: p.name, score: Math.sqrt((p.x - target.x) ** 2 + (p.y - target.y) ** 2 + (p.z - target.z) ** 2) }))
+      .sort((a, b) => a.score - b.score);
     setHoveredNeighbors(candidates.slice(0, 3));
   }, [primaryIdx, pointCloud, alchemyActive]);
 
@@ -204,7 +209,6 @@ export function useVectorMathState(alchemyActive: boolean) {
     animationRef,
     cosmicDust,
     zoom,
-    dynamicZoom,
     showAxes,
     axisTasteX,
     axisTasteY,
@@ -229,16 +233,13 @@ export function useVectorMathState(alchemyActive: boolean) {
   });
 
   // Calculate match percentage between primaryIdx and compareIdx using UMAP pointCloud distance
-  let matchPercentage: number | undefined;
-  if (primaryIdx !== null && compareIdx !== null && pointCloud[primaryIdx] && pointCloud[compareIdx]) {
-    const p1 = pointCloud[primaryIdx];
-    const p2 = pointCloud[compareIdx];
-    const dx = p1.x - p2.x;
-    const dy = p1.y - p2.y;
-    const dz = p1.z - p2.z;
-    const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-    matchPercentage = Math.max(0, 100 - dist * 0.15);
-  }
+  const matchPercentage = useMemo(() => {
+    if (primaryIdx === null || compareIdx === null) return undefined;
+    const p1 = pointCloud[primaryIdx], p2 = pointCloud[compareIdx];
+    if (!p1 || !p2) return undefined;
+    const dist = Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2 + (p1.z - p2.z) ** 2);
+    return Math.max(0, 100 - dist * 0.15);
+  }, [primaryIdx, compareIdx, pointCloud]);
 
   return {
     ingredients,

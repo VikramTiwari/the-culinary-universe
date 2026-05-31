@@ -15,6 +15,7 @@ export interface AlchemicalNode {
   negatives: number[];
   searchResults: { index: number; score: number }[];
   dominantColor?: string;
+  sensory?: number[];
 }
 
 export interface DrawSceneOptions {

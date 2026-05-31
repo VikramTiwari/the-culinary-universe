@@ -8,7 +8,6 @@ interface CanvasAnimationProps {
   animationRef: React.MutableRefObject<number | null>;
   cosmicDust: any[];
   zoom: number;
-  dynamicZoom?: number;
   showAxes: boolean;
   axisTasteX: number;
   axisTasteY: number;
@@ -39,7 +38,6 @@ export function useCanvasAnimation({
   animationRef,
   cosmicDust,
   zoom,
-  dynamicZoom,
   showAxes,
   axisTasteX,
   axisTasteY,
@@ -81,9 +79,7 @@ export function useCanvasAnimation({
       ctx.clearRect(0, 0, width, height);
       frame++;
       
-      // Calculate dynamic alchemical target zoom or fallback to basic zoom
-      const targetZoom = alchemyActive && dynamicZoom !== undefined ? dynamicZoom : zoom;
-      currentZoom += (targetZoom - currentZoom) * 0.05;
+      currentZoom += (zoom - currentZoom) * 0.05;
 
       if (currentCoordsRef.current.length !== pointCloud.length) {
         currentCoordsRef.current = pointCloud.map((p) => ({ x: p.x, y: p.y, z: p.z }));
@@ -134,7 +130,7 @@ export function useCanvasAnimation({
     };
   }, [
     pointCloud, hoveredIdx, selectedIdx, showAxes, showTethers, autoRotate,
-    zoom, dynamicZoom, axisTasteX, axisTasteY, axisTasteZ, tasteMeans, cosmicDust,
+    zoom, axisTasteX, axisTasteY, axisTasteZ, tasteMeans, cosmicDust,
     randomHighlights, alchemyActive, alchemicalNode, isComparing, primaryIdx
   ]);
 }

@@ -378,6 +378,31 @@
   animation: pulse-subtle 3s infinite ease-in-out;
 }
 
+/* Organic Alchemical Nebula Drifting & Breathing Animations */
+@keyframes nebula-slow-drift-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(5vw, -3vh) scale(1.06); }
+}
+@keyframes nebula-slow-drift-2 {
+  0%, 100% { transform: translate(0, 0) scale(1.05); }
+  50% { transform: translate(-4vw, 4vh) scale(0.94); }
+}
+@keyframes nebula-slow-drift-3 {
+  0%, 100% { transform: translate(0, 0) scale(0.96); }
+  50% { transform: translate(3vw, 5vh) scale(1.04); }
+}
+
+.nebula-drift-1 {
+  animation: nebula-slow-drift-1 28s infinite ease-in-out;
+}
+.nebula-drift-2 {
+  animation: nebula-slow-drift-2 34s infinite ease-in-out;
+}
+.nebula-drift-3 {
+  animation: nebula-slow-drift-3 31s infinite ease-in-out;
+}
+
+
 /* Viewport Container for the 3D Canvas */
 .viewport-container {
   width: 100%;

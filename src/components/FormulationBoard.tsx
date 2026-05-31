@@ -99,13 +99,15 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
   };
 
   return (
-    <div className="search-card glass-panel" style={{ 
-      padding: '12px 20px', 
+    <div style={{ 
+      padding: '12px 32px', 
       display: 'flex', 
       alignItems: 'center', 
-      gap: '16px',
+      gap: '20px',
       flexWrap: 'wrap',
-      boxShadow: '0 8px 32px rgba(96, 108, 56, 0.04)',
+      background: 'rgba(255, 255, 255, 0.45)',
+      backdropFilter: 'blur(20px) saturate(180%)',
+      borderBottom: '1px solid rgba(96, 108, 56, 0.15)',
       width: '100%',
       boxSizing: 'border-box'
     }}>

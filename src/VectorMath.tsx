@@ -62,7 +62,15 @@ export default function VectorMath({ alchemyActive = false }: VectorMathProps) {
         </div>
       )}
       
-      <div className="viewport-container">
+      {/* Background Alchemical Color Nebulae & Horizon Data Console Shelf */}
+      {alchemyActive && (
+        <SensorySignature
+          sensory={synthesizedSensory}
+          isEmpty={positives.length === 0 && negatives.length === 0}
+        />
+      )}
+      
+      <div className="viewport-container" style={{ zIndex: 1 }}>
         <canvas
           ref={canvasRef}
           className="viewport-canvas"
@@ -115,9 +123,9 @@ export default function VectorMath({ alchemyActive = false }: VectorMathProps) {
           {/* Top Floating Alchemical Equation Header Banner */}
           <div style={{
             position: 'absolute',
-            left: '24px',
-            top: '24px',
-            right: '24px',
+            left: 0,
+            right: 0,
+            top: 0,
             zIndex: 10,
             pointerEvents: 'auto'
           }} id="alchemy-header-hud">
@@ -138,26 +146,6 @@ export default function VectorMath({ alchemyActive = false }: VectorMathProps) {
             />
           </div>
 
-          {/* Left Floating Sensory Signature Sidebar */}
-          <div style={{
-            position: 'absolute',
-            left: '24px',
-            top: '96px',
-            bottom: '24px',
-            width: '380px',
-            zIndex: 10,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '16px',
-            pointerEvents: 'auto',
-            overflowY: 'auto',
-            paddingRight: '4px'
-          }} id="alchemy-workbench-hud">
-            <SensorySignature
-              sensory={synthesizedSensory}
-              isEmpty={positives.length === 0 && negatives.length === 0}
-            />
-          </div>
         </>
       )}
     </main>

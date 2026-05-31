@@ -266,9 +266,7 @@ export function drawScene(options: DrawSceneOptions) {
     ctx.lineWidth = 1.0;
     ctx.stroke();
 
-    const labelText = (alchemyActive && singleElementIdx !== null)
-      ? (pointCloud.find((item) => item.index === singleElementIdx)?.name || 'Synthesized Compound')
-      : 'Synthesized Compound';
+    const labelText = alchemicalNode.customName || 'Synthesized Compound';
 
     // Render clean text label positioned next to the alchemical node core
     const labelX = px + radius + 15;

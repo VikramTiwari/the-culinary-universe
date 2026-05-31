@@ -13,12 +13,18 @@ interface FormulationBoardProps {
   onRemoveNegative: (idx: number) => void;
   workerState: 'idle' | 'loading' | 'ready' | 'error';
   workerError: string | null;
+  customName: string;
+  setCustomName: (name: string) => void;
+  setIsNameEdited: (edited: boolean) => void;
+  onNameBlur: () => void;
 }
 
 export const FormulationBoard: React.FC<FormulationBoardProps> = ({
   positives, negatives, ingredients,
   onAddPositive, onRemovePositive, onAddNegative, onRemoveNegative,
   workerState, workerError,
+  customName, setCustomName, setIsNameEdited,
+  onNameBlur
 }) => {
   const [posInput, setPosInput] = useState('');
   const [negInput, setNegInput] = useState('');
@@ -265,7 +271,17 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
               </div>
             </div>
 
-            <VectorEquation positives={positives} negatives={negatives} ingredients={ingredients} />
+            <VectorEquation
+              positives={positives}
+              negatives={negatives}
+              ingredients={ingredients}
+              customName={customName}
+              onNameChange={(newName) => {
+                setCustomName(newName);
+                setIsNameEdited(true);
+              }}
+              onNameBlur={onNameBlur}
+            />
           </div>
         )}
       </div>

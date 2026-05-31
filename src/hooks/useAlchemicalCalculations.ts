@@ -9,6 +9,7 @@ interface AlchemicalCalculationsProps {
   pointCloud: any[];
   searchResults: { index: number; score: number }[];
   ingredients: Ingredient[];
+  customName: string;
 }
 
 export function useAlchemicalCalculations({
@@ -17,7 +18,8 @@ export function useAlchemicalCalculations({
   negatives,
   pointCloud,
   searchResults,
-  ingredients
+  ingredients,
+  customName
 }: AlchemicalCalculationsProps) {
   // Real-time Sensory Synthesis math projection for the alchemist guide
   const synthesizedSensory = useMemo(() => {
@@ -107,9 +109,10 @@ export function useAlchemicalCalculations({
       negatives,
       searchResults: filteredSearchResults,
       dominantColor: dominantTasteColor,
-      sensory: synthesizedSensory
+      sensory: synthesizedSensory,
+      customName
     };
-  }, [alchemyActive, positives, negatives, pointCloud, searchResults, dominantTasteColor, synthesizedSensory]);
+  }, [alchemyActive, positives, negatives, pointCloud, searchResults, dominantTasteColor, synthesizedSensory, customName]);
 
   // Calculate dynamic alchemical camera zoom based on coordinate spread
   const dynamicZoom = useMemo(() => {

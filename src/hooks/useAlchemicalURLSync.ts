@@ -8,12 +8,17 @@ interface AlchemicalURLSyncProps {
   setPositives: React.Dispatch<React.SetStateAction<number[]>>;
   negatives: number[];
   setNegatives: React.Dispatch<React.SetStateAction<number[]>>;
+  customName: string;
+  setCustomName: React.Dispatch<React.SetStateAction<string>>;
+  setIsNameEdited: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export function useAlchemicalURLSync({
   alchemyActive, ingredients,
   positives, setPositives,
-  negatives, setNegatives
+  negatives, setNegatives,
+  customName, setCustomName,
+  setIsNameEdited
 }: AlchemicalURLSyncProps) {
   const hasInitializedRef = useRef(false);
   const isReadyToWriteRef = useRef(false);
@@ -63,6 +68,11 @@ export function useAlchemicalURLSync({
 
         setPositives(loadedPositives);
         setNegatives(loadedNegatives);
+
+        if (state.n) {
+          setCustomName(state.n);
+          setIsNameEdited(true);
+        }
       } catch (e) {
         console.warn('Failed to parse alchemical formulation hash ID:', e);
       }
@@ -72,7 +82,7 @@ export function useAlchemicalURLSync({
     setTimeout(() => {
       isReadyToWriteRef.current = true;
     }, 150);
-  }, [alchemyActive, ingredients, setPositives, setNegatives]);
+  }, [alchemyActive, ingredients, setPositives, setNegatives, setCustomName, setIsNameEdited]);
 
   // 2. Encode alchemical state into URL-safe Base64 hash ID on formulation changes
   useEffect(() => {
@@ -85,7 +95,7 @@ export function useAlchemicalURLSync({
         const posNames = positives.map((idx) => ingredients[idx]?.name).filter(Boolean);
         const negNames = negatives.map((idx) => ingredients[idx]?.name).filter(Boolean);
 
-        const state = { a: posNames, s: negNames };
+        const state = { a: posNames, s: negNames, n: customName };
         const json = JSON.stringify(state);
         const base64 = btoa(json);
 
@@ -98,5 +108,5 @@ export function useAlchemicalURLSync({
 
     const newRelativePathQuery = window.location.pathname + window.location.search + (hashQuery ? '#' + hashQuery : '');
     window.history.replaceState(null, '', newRelativePathQuery);
-  }, [alchemyActive, positives, negatives, ingredients]);
+  }, [alchemyActive, positives, negatives, ingredients, customName]);
 }

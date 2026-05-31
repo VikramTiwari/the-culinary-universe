@@ -51,6 +51,25 @@ export function useVectorMathState(alchemyActive: boolean) {
   // Alchemist workspace state
   const [positives, setPositives] = useState<number[]>([]);
   const [negatives, setNegatives] = useState<number[]>([]);
+  const [customName, setCustomName] = useState('Synthesized Compound');
+  const [urlName, setUrlName] = useState('Synthesized Compound');
+  const [isNameEdited, setIsNameEdited] = useState(false);
+
+  // Dynamically update the default name if the user hasn't custom-named it yet
+  useEffect(() => {
+    if (!alchemyActive || isNameEdited || ingredients.length === 0) return;
+    
+    const totalCount = positives.length + negatives.length;
+    let name = 'Synthesized Compound';
+    if (totalCount === 0) {
+      name = 'Empty Formulation';
+    } else if (totalCount === 1) {
+      const idx = positives.length === 1 ? positives[0] : negatives[0];
+      name = ingredients[idx]?.name || 'Synthesized Compound';
+    }
+    setCustomName(name);
+    setUrlName(name);
+  }, [positives, negatives, ingredients, isNameEdited, alchemyActive]);
 
   // Synchronize additions and subtractions to URL query params for easy link sharing
   useAlchemicalURLSync({
@@ -59,7 +78,14 @@ export function useVectorMathState(alchemyActive: boolean) {
     positives,
     setPositives,
     negatives,
-    setNegatives
+    setNegatives,
+    customName: urlName,
+    setCustomName: (name) => {
+      const val = typeof name === 'function' ? name(urlName) : name;
+      setCustomName(val);
+      setUrlName(val);
+    },
+    setIsNameEdited
   });
 
   // Consume Web Worker logic from our custom hook
@@ -88,7 +114,8 @@ export function useVectorMathState(alchemyActive: boolean) {
     negatives,
     pointCloud,
     searchResults,
-    ingredients
+    ingredients,
+    customName
   });
 
   const {
@@ -271,6 +298,10 @@ export function useVectorMathState(alchemyActive: boolean) {
     setPositives,
     negatives,
     setNegatives,
+    customName,
+    setCustomName,
+    setUrlName,
+    setIsNameEdited,
     workerState,
     workerError,
     searchResults,

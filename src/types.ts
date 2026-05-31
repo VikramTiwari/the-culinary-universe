@@ -16,6 +16,7 @@ export interface AlchemicalNode {
   searchResults: { index: number; score: number }[];
   dominantColor?: string;
   sensory?: number[];
+  customName?: string;
 }
 
 export interface DrawSceneOptions {

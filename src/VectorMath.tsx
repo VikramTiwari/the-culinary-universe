@@ -36,6 +36,10 @@ export default function VectorMath({ alchemyActive = false }: VectorMathProps) {
     setPositives,
     negatives,
     setNegatives,
+    customName,
+    setCustomName,
+    setUrlName,
+    setIsNameEdited,
     workerState,
     workerError,
     synthesizedSensory,
@@ -131,6 +135,10 @@ export default function VectorMath({ alchemyActive = false }: VectorMathProps) {
             onRemoveNegative={(idx) => setNegatives((prev) => prev.filter((n) => n !== idx))}
             workerState={workerState}
             workerError={workerError}
+            customName={customName}
+            setCustomName={setCustomName}
+            setIsNameEdited={setIsNameEdited}
+            onNameBlur={() => setUrlName(customName)}
           />
           <SensorySignature
             sensory={synthesizedSensory}

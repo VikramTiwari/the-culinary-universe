@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Ingredient } from '../types';
 
-// Pure function to encode formulation state to a URL-safe Base64 binary hash ID
+// Pure function to encode Flavor Lab state to a URL-safe Base64 binary hash ID
 export function encodeAlchemicalState(
   positives: number[],
   negatives: number[],
@@ -46,7 +46,7 @@ export function encodeAlchemicalState(
   return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-// Pure function to decode formulation state from a URL-safe Base64 binary hash ID
+// Pure function to decode Flavor Lab state from a URL-safe Base64 binary hash ID
 export function decodeAlchemicalState(
   hash: string,
   maxIndex: number
@@ -147,7 +147,7 @@ export function useAlchemicalURLSync({
           setIsNameEdited(true);
         }
       } catch (e) {
-        console.warn('Failed to parse alchemical binary formulation hash ID:', e);
+        console.warn('Failed to parse alchemical binary Flavor Lab hash ID:', e);
       }
     }
 
@@ -157,7 +157,7 @@ export function useAlchemicalURLSync({
     }, 150);
   }, [alchemyActive, ingredients, setPositives, setNegatives, setCustomName, setIsNameEdited]);
 
-  // 2. Encode alchemical state into URL-safe Base64 binary hash ID on formulation changes
+  // 2. Encode alchemical state into URL-safe Base64 binary hash ID on Flavor Lab changes
   useEffect(() => {
     if (!alchemyActive || ingredients.length === 0 || !hasInitializedRef.current || !isReadyToWriteRef.current) return;
 
@@ -166,7 +166,7 @@ export function useAlchemicalURLSync({
       try {
         hashQuery = encodeAlchemicalState(positives, negatives, customName);
       } catch (e) {
-        console.error('Failed to encode alchemical binary formulation hash ID:', e);
+        console.error('Failed to encode alchemical binary Flavor Lab hash ID:', e);
       }
     }
 

@@ -3,10 +3,10 @@ import { Ingredient } from '../types';
 import { useRouter } from '../hooks/useRouter';
 import { IngredientChip } from './IngredientChip';
 import { AutocompleteDropdown } from './AutocompleteDropdown';
-import { useFormulationState } from '../hooks/useFormulationState';
+import { useFlavorLabState } from '../hooks/useFlavorLabState';
 import { RecipeNameInput } from './RecipeNameInput';
 
-interface FormulationBoardProps {
+interface FlavorLabBoardProps {
   positives: number[];
   negatives: number[];
   ingredients: Ingredient[];
@@ -22,7 +22,7 @@ interface FormulationBoardProps {
   onNameBlur: () => void;
 }
 
-export const FormulationBoard: React.FC<FormulationBoardProps> = ({
+export const FlavorLabBoard: React.FC<FlavorLabBoardProps> = ({
   positives, negatives, ingredients,
   onAddPositive, onRemovePositive, onAddNegative, onRemoveNegative,
   workerState, workerError,
@@ -48,7 +48,7 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
     filteredPosSuggestions,
     filteredNegSuggestions,
     handleDropdownKeyDown
-  } = useFormulationState({
+  } = useFlavorLabState({
     ingredients,
     positives,
     negatives
@@ -83,7 +83,7 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
           textTransform: 'uppercase', 
           letterSpacing: '0.08em',
           color: 'var(--text-muted)'
-        }}>Formulation</span>
+        }}>Flavor Lab</span>
       </div>
 
       {workerState === 'loading' && (
@@ -282,4 +282,3 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
     </div>
   );
 };
-

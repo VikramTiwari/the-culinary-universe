@@ -2,7 +2,7 @@ import { HeaderHUD } from './components/HeaderHUD';
 import { LegendHUD } from './components/LegendHUD';
 import { SensoryCardHUD } from './components/SensoryCardHUD';
 import { ControlsHUD } from './components/ControlsHUD';
-import { FormulationBoard } from './components/FormulationBoard';
+import { FlavorLabBoard } from './components/FlavorLabBoard';
 import { SensorySignature } from './components/SensorySignature';
 import { useVectorMathState } from './hooks/useVectorMathState';
 
@@ -129,7 +129,7 @@ export default function VectorMath({ alchemyActive = false }: VectorMathProps) {
             zIndex: 10,
             pointerEvents: 'auto'
           }} id="alchemy-header-hud">
-            <FormulationBoard
+            <FlavorLabBoard
               positives={positives}
               negatives={negatives}
               ingredients={ingredients}

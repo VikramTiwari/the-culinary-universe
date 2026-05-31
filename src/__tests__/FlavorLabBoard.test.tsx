@@ -2,10 +2,10 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { createRoot } from 'react-dom/client';
 import { act } from 'react';
-import { FormulationBoard } from '../components/FormulationBoard';
+import { FlavorLabBoard } from '../components/FlavorLabBoard';
 import { Ingredient } from '../types';
 
-describe('FormulationBoard HUD Component', () => {
+describe('FlavorLabBoard HUD Component', () => {
   let container: HTMLDivElement;
 
   const mockIngredients: Ingredient[] = [
@@ -43,7 +43,7 @@ describe('FormulationBoard HUD Component', () => {
     const root = createRoot(container);
     act(() => {
       root.render(
-        <FormulationBoard
+        <FlavorLabBoard
           positives={[]}
           negatives={[]}
           ingredients={mockIngredients}
@@ -92,7 +92,7 @@ describe('FormulationBoard HUD Component', () => {
     const root = createRoot(container);
     act(() => {
       root.render(
-        <FormulationBoard
+        <FlavorLabBoard
           positives={[0]} // Tomato
           negatives={[2]} // Sugar
           ingredients={mockIngredients}
@@ -135,7 +135,7 @@ describe('FormulationBoard HUD Component', () => {
     const root = createRoot(container);
     act(() => {
       root.render(
-        <FormulationBoard
+        <FlavorLabBoard
           positives={[0, 1]} // Tomato, Basil
           negatives={[]}
           ingredients={mockIngredients}

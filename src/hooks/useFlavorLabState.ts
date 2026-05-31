@@ -1,17 +1,17 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { Ingredient } from '../types';
 
-interface UseFormulationStateParams {
+interface UseFlavorLabStateParams {
   ingredients: Ingredient[];
   positives: number[];
   negatives: number[];
 }
 
-export function useFormulationState({
+export function useFlavorLabState({
   ingredients,
   positives,
   negatives,
-}: UseFormulationStateParams) {
+}: UseFlavorLabStateParams) {
   const [posInput, setPosInput] = useState('');
   const [negInput, setNegInput] = useState('');
   const [showPosDropdown, setShowPosDropdown] = useState(false);

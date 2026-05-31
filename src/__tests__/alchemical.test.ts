@@ -137,9 +137,9 @@ describe('Alchemical Synthesis Calculations', () => {
   });
 
   describe('determineDefaultRecipeName', () => {
-    it('should return "Empty Formulation" if positives and negatives are empty', () => {
+    it('should return "Empty Flavor Lab" if positives and negatives are empty', () => {
       const name = determineDefaultRecipeName([], [], mockIngredients);
-      expect(name).toBe('Empty Formulation');
+      expect(name).toBe('Empty Flavor Lab');
     });
 
     it('should return ingredient name if single element is active', () => {

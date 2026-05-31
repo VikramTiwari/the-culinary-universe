@@ -128,7 +128,7 @@ export function determineDefaultRecipeName(
 ): string {
   const totalCount = positives.length + negatives.length;
   if (totalCount === 0) {
-    return 'Empty Formulation';
+    return 'Empty Flavor Lab';
   } else if (totalCount === 1) {
     const idx = positives.length === 1 ? positives[0] : negatives[0];
     return ingredients[idx]?.name || 'Synthesized Compound';

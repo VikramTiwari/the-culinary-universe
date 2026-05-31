@@ -35,7 +35,7 @@ describe('Alchemical URL Base64 Binary Serialization', () => {
     expect(encoded).not.toContain('=');
   });
 
-  it('should decode empty formulation states cleanly', () => {
+  it('should decode empty Flavor Lab states cleanly', () => {
     const positives: number[] = [];
     const negatives: number[] = [];
     const customName = '';
@@ -51,7 +51,7 @@ describe('Alchemical URL Base64 Binary Serialization', () => {
   it('should filter out indices that exceed the database maxIndex limit during decoding', () => {
     const positives = [10, 500]; // 500 exceeds maxIndex = 400
     const negatives = [300, 450]; // 450 exceeds maxIndex = 400
-    const customName = 'Safe formulation';
+    const customName = 'Safe Flavor Lab';
 
     const encoded = encodeAlchemicalState(positives, negatives, customName);
     const decoded = decodeAlchemicalState(encoded, maxIndex);

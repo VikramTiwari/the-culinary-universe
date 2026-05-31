@@ -133,7 +133,83 @@ export function determineDefaultRecipeName(
     const idx = positives.length === 1 ? positives[0] : negatives[0];
     return ingredients[idx]?.name || 'Synthesized Compound';
   }
-  return 'Synthesized Compound';
+
+  // 1. Gather active ingredient names
+  const activeIndices = [...positives, ...negatives];
+  const names = activeIndices
+    .map((idx) => ingredients[idx]?.name)
+    .filter(Boolean) as string[];
+
+  if (names.length === 0) {
+    return 'Synthesized Compound';
+  }
+
+  // 2. Stable seeded pseudorandom generator based on combined indices
+  const seedStr = activeIndices.slice().sort().join('-');
+  let hash = 0;
+  for (let i = 0; i < seedStr.length; i++) {
+    hash = seedStr.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  
+  const random = () => {
+    hash = (hash * 1664525 + 1013904223) | 0;
+    return (hash >>> 0) / 0xffffffff;
+  };
+
+  // 3. Extract prefix, middle, and suffix slices from clean ingredient names
+  const chunks: string[] = [];
+  for (const name of names) {
+    const clean = name.toLowerCase().replace(/[^a-z]/g, '');
+    if (clean.length <= 3) {
+      chunks.push(clean);
+    } else {
+      const len = clean.length;
+      chunks.push(clean.slice(0, Math.ceil(len / 2)));
+      chunks.push(clean.slice(Math.floor(len / 2)));
+      if (len >= 5) {
+        chunks.push(clean.slice(Math.floor(len / 4), Math.ceil((3 * len) / 4)));
+      }
+    }
+  }
+
+  if (chunks.length === 0) {
+    return 'Synthesized Compound';
+  }
+
+  // 4. Randomly pick and concatenate 2 to 3 chunks
+  const numChunksToUse = random() > 0.5 ? 3 : 2;
+  let blended = '';
+  for (let i = 0; i < numChunksToUse; i++) {
+    const pickIdx = Math.floor(random() * chunks.length);
+    blended += chunks[pickIdx];
+  }
+
+  // Deduplicate adjacent repeating letters (e.g. "tto" -> "to") and limit size
+  blended = blended.replace(/(.)\1+/g, '$1');
+  if (blended.length > 14) {
+    blended = blended.slice(0, 12);
+  }
+
+  // Format as Capitalized title case
+  let nameResult = blended.charAt(0).toUpperCase() + blended.slice(1);
+
+  // 5. Add a culinary/alchemical descriptor with a 65% probability
+  const alchemicalModifiers = [
+    'Elixir', 'Essence', 'Reduction', 'Emulsion', 'Extract', 
+    'Glaze', 'Dust', 'Infusion', 'Nectar', 'Mist', 'Nebula', 
+    'Concoction', 'Synthesis', 'Blend', 'Symphony', 'Compote'
+  ];
+  
+  if (random() > 0.35) {
+    const modifier = alchemicalModifiers[Math.floor(random() * alchemicalModifiers.length)];
+    if (random() > 0.5) {
+      nameResult = `${nameResult} ${modifier}`;
+    } else {
+      nameResult = `${modifier} of ${nameResult}`;
+    }
+  }
+
+  return nameResult;
 }
 
 interface AlchemicalCalculationsProps {

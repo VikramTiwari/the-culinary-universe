@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Ingredient } from '../types';
 import { TASTE_NAMES, TASTE_COLORS } from '../constants';
+import { useRouter } from '../hooks/useRouter';
 
 interface FormulationBoardProps {
   positives: number[];
@@ -25,6 +26,7 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
   customName, setCustomName, setIsNameEdited,
   onNameBlur
 }) => {
+  const { navigate } = useRouter();
   const [posInput, setPosInput] = useState('');
   const [negInput, setNegInput] = useState('');
   const [showPosDropdown, setShowPosDropdown] = useState(false);
@@ -115,13 +117,11 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
       <div style={{ 
         display: 'flex', 
         alignItems: 'center', 
-        gap: '8px', 
         borderRight: '1px solid rgba(255,255,255,0.08)', 
         paddingRight: '16px', 
         userSelect: 'none',
         height: '24px'
       }}>
-        <span style={{ fontSize: '18px', filter: 'drop-shadow(0 0 4px var(--color-glow))' }}>🧪</span>
         <span style={{ 
           fontFamily: '"Outfit", sans-serif', 
           fontSize: '11px', 
@@ -357,6 +357,41 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
 
         </div>
       )}
+
+      {/* Floating Exit Button on Far Right of the Shelf */}
+      <button
+        onClick={() => navigate('/')}
+        style={{
+          background: 'rgba(33, 37, 41, 0.04)',
+          color: 'var(--text-secondary)',
+          border: '1px solid rgba(96, 108, 56, 0.15)',
+          borderRadius: '99px',
+          padding: '6px 14px',
+          fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
+          fontSize: '11px',
+          fontWeight: 600,
+          cursor: 'pointer',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '4px',
+          transition: 'all 0.2s ease',
+          userSelect: 'none',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = 'rgba(33, 37, 41, 0.08)';
+          e.currentTarget.style.borderColor = 'rgba(96, 108, 56, 0.3)';
+          e.currentTarget.style.color = 'var(--text-primary)';
+          e.currentTarget.style.transform = 'translateY(-0.5px)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = 'rgba(33, 37, 41, 0.04)';
+          e.currentTarget.style.borderColor = 'rgba(96, 108, 56, 0.15)';
+          e.currentTarget.style.color = 'var(--text-secondary)';
+          e.currentTarget.style.transform = 'none';
+        }}
+      >
+        <span>Return to Explorer</span>
+      </button>
     </div>
   );
 };

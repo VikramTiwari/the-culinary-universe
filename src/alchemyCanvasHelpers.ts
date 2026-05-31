@@ -157,7 +157,6 @@ export function drawAlchemicalCore(
   const { px, py, scale } = project3DTo2D(translatedAlchemicalNode, { ...projectionParams, zoom });
   const baseRadius = 14.0; // Larger core diameter for dominant focal presence
   const radius = Math.max(1.0, baseRadius * scale);
-  const pulse = (frame % 60) / 60;
   
   // Mathematically blend constituent flavor colors based on their active weights in the synthesized sensory profile
   const activeFlavors: { color: string; weight: number }[] = [];
@@ -199,23 +198,29 @@ export function drawAlchemicalCore(
     constituentFlavorColors.push('#bf9525');
   }
 
+  // Smooth sine-based breathing cycles for natural, premium alchemist animations
+  const breath = Math.sin(frame * 0.035); // Smooth wave between -1 and 1
+  const pulse1 = breath * 0.5 + 0.5; // [0, 1]
+  const pulse2 = (-breath) * 0.5 + 0.5; // [0, 1], perfectly out-of-phase!
+
+  
   // Glowing shell 1 (Primary - Weighted Blended Taste Reactive Color)
-  ctx.globalAlpha = 0.85 - pulse;
+  ctx.globalAlpha = 0.15 + pulse1 * 0.35; // Gentle transition [0.15, 0.50]
   ctx.beginPath();
-  ctx.arc(px, py, radius * (1.0 + pulse * 1.8), 0, Math.PI * 2);
+  ctx.arc(px, py, radius * (1.0 + pulse1 * 0.4), 0, Math.PI * 2);
   ctx.strokeStyle = mixedColor;
-  ctx.lineWidth = 2.5;
+  ctx.lineWidth = 2.0;
   ctx.stroke();
 
-  // Glowing shell 2 (Secondary, out-of-phase double pulsation Honey Gold corona)
-  const pulse2 = ((frame + 30) % 60) / 60;
-  ctx.globalAlpha = 0.5 - pulse2;
+  // Glowing shell 2 (Secondary - Out-of-phase Honey Gold corona)
+  ctx.globalAlpha = 0.08 + pulse2 * 0.20; // Subtle transition [0.08, 0.28]
   ctx.beginPath();
-  ctx.arc(px, py, radius * (1.0 + pulse2 * 2.5), 0, Math.PI * 2);
+  ctx.arc(px, py, radius * (1.0 + pulse2 * 0.6), 0, Math.PI * 2);
   ctx.strokeStyle = '#bf9525';
-  ctx.lineWidth = 1.2;
+  ctx.lineWidth = 1.0;
   ctx.stroke();
   ctx.globalAlpha = 1.0; // Reset global alpha
+
 
   // Inner deep radial glow (Weighted Blended Taste Reactive Color)
   ctx.beginPath();

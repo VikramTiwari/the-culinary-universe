@@ -12,6 +12,7 @@ interface UseMapInteractionProps {
   setAxisTasteX: (val: number) => void;
   setAxisTasteY: (val: number) => void;
   setAxisTasteZ: (val: number) => void;
+  alchemyActive: boolean;
 }
 
 export function useMapInteraction({
@@ -24,7 +25,8 @@ export function useMapInteraction({
   setZoom,
   setAxisTasteX,
   setAxisTasteY,
-  setAxisTasteZ
+  setAxisTasteZ,
+  alchemyActive
 }: UseMapInteractionProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const projectedPointsRef = useRef<{ index: number; px: number; py: number }[]>([]);
@@ -47,10 +49,11 @@ export function useMapInteraction({
   const resetInactivityTimer = () => {
     setAutoRotate(false);
     if (inactivityTimerRef.current) window.clearTimeout(inactivityTimerRef.current);
-    if (userWantsAutoRotateRef.current) {
+    if (userWantsAutoRotateRef.current && !alchemyActive) {
       inactivityTimerRef.current = window.setTimeout(() => setAutoRotate(true), 5000);
     }
   };
+
 
   const cancelTargetTransition = () => {
     targetAngleXRef.current = null;

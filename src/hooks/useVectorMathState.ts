@@ -23,7 +23,6 @@ export function useVectorMathState(alchemyActive: boolean) {
 
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
-  // URL State Synced Params Hook (Disables standard sync on lab page)
   const {
     selectedIdx,
     setSelectedIdx,
@@ -59,23 +58,19 @@ export function useVectorMathState(alchemyActive: boolean) {
     primaryIdx
   );
 
-  // Alchemist workspace state
   const [positives, setPositives] = useState<number[]>([]);
   const [negatives, setNegatives] = useState<number[]>([]);
   const [customName, setCustomName] = useState('Synthesized Compound');
   const [urlName, setUrlName] = useState('Synthesized Compound');
   const [isNameEdited, setIsNameEdited] = useState(false);
 
-  // Dynamically update the default name if the user hasn't custom-named it yet
   useEffect(() => {
     if (!alchemyActive || isNameEdited || ingredients.length === 0) return;
-    
     const name = determineDefaultRecipeName(positives, negatives, ingredients);
     setCustomName(name);
     setUrlName(name);
   }, [positives, negatives, ingredients, isNameEdited, alchemyActive]);
 
-  // Synchronize additions and subtractions to URL query params for easy link sharing
   useAlchemicalURLSync({
     alchemyActive,
     ingredients,
@@ -92,7 +87,6 @@ export function useVectorMathState(alchemyActive: boolean) {
     setIsNameEdited
   });
 
-  // Consume Web Worker logic from our custom hook
   const {
     workerState,
     workerError,
@@ -105,7 +99,6 @@ export function useVectorMathState(alchemyActive: boolean) {
   const currentCoordsRef = useRef<{ x: number; y: number; z: number }[]>([]);
   const animationRef = useRef<number | null>(null);
 
-  // Real-time sensory, zoom, and coordinate projections for alchemist workbench
   const { alchemicalNode, synthesizedSensory, dynamicZoom } = useAlchemicalCalculations({
     alchemyActive,
     positives,
@@ -142,13 +135,13 @@ export function useVectorMathState(alchemyActive: boolean) {
     setZoom,
     setAxisTasteX,
     setAxisTasteY,
-    setAxisTasteZ
+    setAxisTasteZ,
+    alchemyActive
   });
 
   const hasAutofocusedRef = useRef(false);
   const hasOrientedRef = useRef(false);
 
-  // Autofocus camera on the selected node on load
   useEffect(() => {
     if (selectedIdx !== null && pointCloud.length > 0 && !hasAutofocusedRef.current) {
       const p = pointCloud[selectedIdx];
@@ -161,6 +154,7 @@ export function useVectorMathState(alchemyActive: boolean) {
       }
     }
   }, [pointCloud, selectedIdx]);
+
 
   // Keep alchemical compound front and center in alchemist lab mode (only once on initial compound formation)
   useEffect(() => {
@@ -177,19 +171,35 @@ export function useVectorMathState(alchemyActive: boolean) {
     }
   }, [alchemyActive, alchemicalNode]);
 
-  // Synchronize dynamic alchemical zoom to the zoom state when ingredients change
   useEffect(() => {
     if (alchemyActive && dynamicZoom !== undefined) {
       setZoom(dynamicZoom);
     }
   }, [alchemyActive, dynamicZoom, setZoom]);
 
-  // Force disable autoRotate when alchemist lab mode becomes active
   useEffect(() => {
-    if (alchemyActive) setAutoRotate(false);
+    if (!alchemyActive) return;
+    let timer: number | null = null;
+    const resetTimer = () => {
+      setAutoRotate(false);
+      if (timer) window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        setAutoRotate(true);
+      }, 5000);
+    };
+    resetTimer();
+    const activityEvents = ['pointerdown', 'keydown', 'wheel'];
+    activityEvents.forEach((event) => {
+      window.addEventListener(event, resetTimer, { passive: true });
+    });
+    return () => {
+      if (timer) window.clearTimeout(timer);
+      activityEvents.forEach((event) => {
+        window.removeEventListener(event, resetTimer);
+      });
+    };
   }, [alchemyActive]);
 
-  // Canvas animation loop handled via delegated custom hook
   useCanvasAnimation({
     canvasRef,
     pointCloud,
@@ -221,7 +231,6 @@ export function useVectorMathState(alchemyActive: boolean) {
     clusters
   });
 
-  // Calculate match percentage between primaryIdx and compareIdx using UMAP pointCloud distance
   const matchPercentage = useMemo(() => {
     if (primaryIdx === null || compareIdx === null) return undefined;
     const p1 = pointCloud[primaryIdx], p2 = pointCloud[compareIdx];
@@ -229,6 +238,7 @@ export function useVectorMathState(alchemyActive: boolean) {
     const dist = Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2 + (p1.z - p2.z) ** 2);
     return Math.max(0, 100 - dist * 0.15);
   }, [primaryIdx, compareIdx, pointCloud]);
+
 
   return {
     ingredients,

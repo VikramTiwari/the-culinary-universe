@@ -105,8 +105,7 @@ export function useCanvasAnimation({
           angleYRef.current = targetAngleYRef.current;
           cancelTargetTransition();
         }
-      } else if (!isDragging.current && autoRotate && !alchemyActive) {
-        // Enforce: absolutely no auto rotation on the lab page
+      } else if (!isDragging.current && autoRotate) {
         angleYRef.current += 0.0012;
         angleXRef.current += Math.sin(frame * 0.006) * 0.0006;
       }

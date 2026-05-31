@@ -140,7 +140,7 @@ export function drawStandardParticles(
       }
       opacity = opacity * 0.35; // Faint, subtle presence
     }
-    ctx.fillStyle = `rgba(${rgb}, opacity)`;
+    ctx.fillStyle = `rgba(${rgb}, ${opacity})`;
     ctx.fill();
   });
 }

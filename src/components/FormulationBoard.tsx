@@ -221,10 +221,16 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
                   setPosActiveIndex(0);
                 }}
                 onFocus={() => setShowPosDropdown(true)}
-                onKeyDown={(e) => handleDropdownKeyDown(
-                  e, filteredPosSuggestions, posActiveIndex, setPosActiveIndex,
-                  onAddPositive, setPosInput, setShowPosDropdown
-                )}
+                onKeyDown={(e) => {
+                  if (e.key === 'Backspace' && posInput === '' && positives.length > 0) {
+                    onRemovePositive(positives[positives.length - 1]);
+                  } else {
+                    handleDropdownKeyDown(
+                      e, filteredPosSuggestions, posActiveIndex, setPosActiveIndex,
+                      onAddPositive, setPosInput, setShowPosDropdown
+                    );
+                  }
+                }}
               />
 
               {showPosDropdown && filteredPosSuggestions.length > 0 && (
@@ -297,10 +303,16 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
                   setNegActiveIndex(0);
                 }}
                 onFocus={() => setShowNegDropdown(true)}
-                onKeyDown={(e) => handleDropdownKeyDown(
-                  e, filteredNegSuggestions, negActiveIndex, setNegActiveIndex,
-                  onAddNegative, setNegInput, setShowNegDropdown
-                )}
+                onKeyDown={(e) => {
+                  if (e.key === 'Backspace' && negInput === '' && negatives.length > 0) {
+                    onRemoveNegative(negatives[negatives.length - 1]);
+                  } else {
+                    handleDropdownKeyDown(
+                      e, filteredNegSuggestions, negActiveIndex, setNegActiveIndex,
+                      onAddNegative, setNegInput, setShowNegDropdown
+                    );
+                  }
+                }}
               />
 
               {showNegDropdown && filteredNegSuggestions.length > 0 && (

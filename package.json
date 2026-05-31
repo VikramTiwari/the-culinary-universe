@@ -10,7 +10,9 @@
     "wasm:build": "wasm-pack build ./wasm-engine --target web --out-dir ../src/wasm-engine/pkg",
     "generate-data": "node scripts/generate-dataset.js",
     "deploy": "npm run build && npx -y gh-pages -d dist && npx -y firebase-tools@latest deploy --only hosting",
-    "deploy:firebase": "npm run build && npx -y firebase-tools@latest deploy --only hosting"
+    "deploy:firebase": "npm run build && npx -y firebase-tools@latest deploy --only hosting",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "firebase": "^12.14.0",
@@ -22,7 +24,9 @@
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
+    "happy-dom": "^20.9.0",
     "typescript": "^5.5.3",
-    "vite": "^5.4.1"
+    "vite": "^5.4.1",
+    "vitest": "^4.1.7"
   }
 }

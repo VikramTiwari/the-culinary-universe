@@ -46,11 +46,40 @@ impl LocalVectorIndex {
     ///   function call. Cloning gives Rust complete ownership of the data.
     #[wasm_bindgen(constructor)]
     pub fn new(buffer: &[f32], dimensions: usize) -> Result<LocalVectorIndex, JsValue> {
+        Self::new_internal(buffer, dimensions).map_err(|err| JsValue::from_str(&err))
+    }
+
+    /// Computes the resulting query vector from positive and negative indices, and
+    /// performs a contiguous, linear memory scan (brute-force KNN) to find the top `top_k` matches.
+    ///
+    /// ### Memory Boundary Boundary Notice:
+    /// - `positives` and `negatives` are typed as `&[u32]`. They represent indices of positive
+    ///   and negative terms (e.g. `[Tomato, Basil]` - `[Sugar]`).
+    /// - The query vector $\vec{T} = \sum \vec{P} - \sum \vec{N}$ is computed locally in Rust memory.
+    /// - Cosine similarity is computed: $\cos(\theta) = \frac{\vec{T} \cdot \vec{V}}{\|\vec{T}\| \|\vec{V}\|}$.
+    /// - Returns a serialized `JsValue` containing the top K search matches, converted with zero-overhead
+    ///   by `serde_wasm_bindgen` into native JavaScript objects.
+    pub fn compute_and_search(
+        &self,
+        positives: &[u32],
+        negatives: &[u32],
+        top_k: usize,
+    ) -> Result<JsValue, JsValue> {
+        match self.search_internal(positives, negatives, top_k) {
+            Ok(results) => Ok(serde_wasm_bindgen::to_value(&results)?),
+            Err(err_msg) => Err(JsValue::from_str(&err_msg)),
+        }
+    }
+}
+
+// Pure Rust internal computation and search implementation for complete native testability
+impl LocalVectorIndex {
+    pub fn new_internal(buffer: &[f32], dimensions: usize) -> Result<LocalVectorIndex, String> {
         if dimensions == 0 {
-            return Err(JsValue::from_str("Dimensions must be greater than zero"));
+            return Err("Dimensions must be greater than zero".to_string());
         }
         if buffer.len() % dimensions != 0 {
-            return Err(JsValue::from_str("Buffer size is not a multiple of the vector dimensions"));
+            return Err("Buffer size is not a multiple of the vector dimensions".to_string());
         }
 
         let num_vectors = buffer.len() / dimensions;
@@ -78,25 +107,14 @@ impl LocalVectorIndex {
         })
     }
 
-
-    /// Computes the resulting query vector from positive and negative indices, and
-    /// performs a contiguous, linear memory scan (brute-force KNN) to find the top `top_k` matches.
-    ///
-    /// ### Memory Boundary Boundary Notice:
-    /// - `positives` and `negatives` are typed as `&[u32]`. They represent indices of positive
-    ///   and negative terms (e.g. `[Tomato, Basil]` - `[Sugar]`).
-    /// - The query vector $\vec{T} = \sum \vec{P} - \sum \vec{N}$ is computed locally in Rust memory.
-    /// - Cosine similarity is computed: $\cos(\theta) = \frac{\vec{T} \cdot \vec{V}}{\|\vec{T}\| \|\vec{V}\|}$.
-    /// - Returns a serialized `JsValue` containing the top K search matches, converted with zero-overhead
-    ///   by `serde_wasm_bindgen` into native JavaScript objects.
-    pub fn compute_and_search(
+    pub fn search_internal(
         &self,
         positives: &[u32],
         negatives: &[u32],
         top_k: usize,
-    ) -> Result<JsValue, JsValue> {
+    ) -> Result<Vec<SearchResult>, String> {
         if positives.is_empty() && negatives.is_empty() {
-            return Err(JsValue::from_str("Must specify at least one positive or negative ingredient"));
+            return Err("Must specify at least one positive or negative ingredient".to_string());
         }
 
         // Initialize target query vector
@@ -106,7 +124,7 @@ impl LocalVectorIndex {
         for &idx in positives {
             let idx_usize = idx as usize;
             if idx_usize >= self.num_vectors {
-                return Err(JsValue::from_str(&format!("Positive index {} out of bounds", idx)));
+                return Err(format!("Positive index {} out of bounds", idx));
             }
             let start = idx_usize * self.dimensions;
             let end = start + self.dimensions;
@@ -120,7 +138,7 @@ impl LocalVectorIndex {
         for &idx in negatives {
             let idx_usize = idx as usize;
             if idx_usize >= self.num_vectors {
-                return Err(JsValue::from_str(&format!("Negative index {} out of bounds", idx)));
+                return Err(format!("Negative index {} out of bounds", idx));
             }
             let start = idx_usize * self.dimensions;
             let end = start + self.dimensions;
@@ -175,7 +193,91 @@ impl LocalVectorIndex {
         // 6. Truncate to top K results
         results.truncate(top_k);
 
-        // 7. Serialize to JavaScript value using serde_wasm_bindgen
-        Ok(serde_wasm_bindgen::to_value(&results)?)
+        Ok(results)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_index_initialization_success() {
+        let buffer = vec![
+            1.0, 0.0, 0.0,
+            0.0, 1.0, 0.0,
+            0.0, 0.0, 1.0,
+        ];
+        let index = LocalVectorIndex::new_internal(&buffer, 3).unwrap();
+        assert_eq!(index.dimensions, 3);
+        assert_eq!(index.num_vectors, 3);
+    }
+
+    #[test]
+    fn test_index_initialization_invalid() {
+        let buffer = vec![1.0, 0.0];
+        // Zero dimensions
+        assert!(LocalVectorIndex::new_internal(&buffer, 0).is_err());
+        // Mismatched size (2 values, dimension 3)
+        assert!(LocalVectorIndex::new_internal(&buffer, 3).is_err());
+    }
+
+    #[test]
+    fn test_norms_precomputation() {
+        let buffer = vec![
+            3.0, 4.0, 0.0, // length = sqrt(3^2 + 4^2) = 5
+            0.0, 1.0, 0.0, // length = 1
+        ];
+        let index = LocalVectorIndex::new_internal(&buffer, 3).unwrap();
+        assert_eq!(index.norms[0], 5.0f32);
+        assert_eq!(index.norms[1], 1.0f32);
+    }
+
+    #[test]
+    fn test_compute_and_search_success() {
+        // Index with 3 vectors of dimension 3:
+        // Index 0: [1.0, 0.0, 0.0]
+        // Index 1: [0.0, 1.0, 0.0]
+        // Index 2: [0.0, 0.0, 1.0]
+        let buffer = vec![
+            1.0, 0.0, 0.0,
+            0.0, 1.0, 0.0,
+            0.0, 0.0, 1.0,
+        ];
+        let index = LocalVectorIndex::new_internal(&buffer, 3).unwrap();
+
+        // 1. Positive query for Index 0
+        let results = index.search_internal(&[0], &[], 3).unwrap();
+        
+        // The closest vector should be Index 0 itself (score = 1.0)
+        assert_eq!(results[0].index, 0);
+        assert_eq!(results[0].score, 1.0f32);
+        
+        // 2. Synthesized blend query with positives and negatives:
+        // Target: [1.0, 1.0, 0.0] (combining Index 0 + Index 1)
+        let results2 = index.search_internal(&[0, 1], &[], 3).unwrap();
+        
+        // Score for Index 0 and Index 1: 1.0 / sqrt(2) = 0.70710677
+        assert_eq!(results2[0].score.is_nan(), false);
+        assert!((results2[0].score - 0.70710677).abs() < 1e-5);
+    }
+
+    #[test]
+    fn test_compute_and_search_out_of_bounds() {
+        let buffer = vec![1.0, 0.0, 0.0];
+        let index = LocalVectorIndex::new_internal(&buffer, 3).unwrap();
+
+        // Positive out of bounds
+        assert!(index.search_internal(&[5], &[], 3).is_err());
+        // Negative out of bounds
+        assert!(index.search_internal(&[], &[5], 3).is_err());
+    }
+
+    #[test]
+    fn test_compute_and_search_empty_queries() {
+        let buffer = vec![1.0, 0.0, 0.0];
+        let index = LocalVectorIndex::new_internal(&buffer, 3).unwrap();
+
+        assert!(index.search_internal(&[], &[], 3).is_err());
     }
 }

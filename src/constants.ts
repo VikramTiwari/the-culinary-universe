@@ -1,5 +1,5 @@
 export const TASTE_NAMES = [
-  'Sweet', 'Sour', 'Salty', 'Bitter', 'Umami', 
+  'Sweet', 'Sour', 'Salty', 'Bitter', 'Umami',
   'Spicy', 'Herbal', 'Citrusy', 'Smoky', 'Fatty/Rich'
 ];
 
@@ -29,3 +29,5 @@ export const TASTE_RGBS: { [key: string]: string } = {
   '#b67732': '182, 119, 50',   // FattyRich
   '#6366f1': '99, 102, 241'    // Indigo fallback
 };
+
+export const INACTIVITY_TIMEOUT_MS = 1_000 * 30;

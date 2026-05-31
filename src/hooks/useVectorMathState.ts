@@ -10,6 +10,7 @@ import {
 import { useAlchemicalURLSync } from './useAlchemicalURLSync';
 import { useIngredientLoader } from './useIngredientLoader';
 import { useMapHighlights } from './useMapHighlights';
+import { INACTIVITY_TIMEOUT_MS } from '../constants';
 
 export function useVectorMathState(alchemyActive: boolean) {
   const {
@@ -185,7 +186,7 @@ export function useVectorMathState(alchemyActive: boolean) {
       if (timer) window.clearTimeout(timer);
       timer = window.setTimeout(() => {
         setAutoRotate(true);
-      }, 5000);
+      }, INACTIVITY_TIMEOUT_MS);
     };
     resetTimer();
     const activityEvents = ['pointerdown', 'keydown', 'wheel'];

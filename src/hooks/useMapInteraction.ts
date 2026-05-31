@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react';
+import { INACTIVITY_TIMEOUT_MS } from '../constants';
 
 interface UseMapInteractionProps {
   pointCloud: any[];
@@ -50,7 +51,7 @@ export function useMapInteraction({
     setAutoRotate(false);
     if (inactivityTimerRef.current) window.clearTimeout(inactivityTimerRef.current);
     if (userWantsAutoRotateRef.current && !alchemyActive) {
-      inactivityTimerRef.current = window.setTimeout(() => setAutoRotate(true), 5000);
+      inactivityTimerRef.current = window.setTimeout(() => setAutoRotate(true), INACTIVITY_TIMEOUT_MS);
     }
   };
 

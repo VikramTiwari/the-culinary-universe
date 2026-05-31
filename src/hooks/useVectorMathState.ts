@@ -4,7 +4,8 @@ import {
   calculateUmapCenterOffset,
   calculateTasteMeans,
   generateCosmicDust,
-  generatePointCloud
+  generatePointCloud,
+  performKMeansClustering
 } from '../math';
 import { useMapInteraction } from './useMapInteraction';
 import { useVectorSearchWorker } from './useVectorSearchWorker';
@@ -105,6 +106,7 @@ export function useVectorMathState(alchemyActive: boolean) {
   const tasteMeans = useMemo(() => calculateTasteMeans(ingredients), [ingredients]);
 
   const pointCloud = useMemo(() => generatePointCloud(ingredients, umapCenterOffset), [ingredients, umapCenterOffset]);
+  const clusters = useMemo(() => performKMeansClustering(pointCloud), [pointCloud]);
   const [randomHighlights, setRandomHighlights] = useState<number[]>([]);
 
   // Real-time sensory, zoom, and coordinate projections for alchemist workbench
@@ -256,7 +258,8 @@ export function useVectorMathState(alchemyActive: boolean) {
     isDragging,
     projectedPointsRef,
     cancelTargetTransition,
-    autoRotate
+    autoRotate,
+    clusters
   });
 
   // Calculate match percentage between primaryIdx and compareIdx using UMAP pointCloud distance

@@ -19,6 +19,13 @@ export interface AlchemicalNode {
   customName?: string;
 }
 
+export interface Cluster {
+  centroid: { x: number; y: number; z: number };
+  color: string;
+  majorityTasteIdx: number;
+  memberIndices: number[];
+}
+
 export interface DrawSceneOptions {
   ctx: CanvasRenderingContext2D;
   pointCloud: any[];
@@ -39,4 +46,5 @@ export interface DrawSceneOptions {
   randomHighlights?: number[];
   alchemicalNode?: AlchemicalNode | null;
   alchemyActive?: boolean;
+  clusters?: Cluster[];
 }

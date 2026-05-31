@@ -29,6 +29,7 @@ interface CanvasAnimationProps {
   projectedPointsRef: React.MutableRefObject<{ index: number; px: number; py: number }[]>;
   cancelTargetTransition: () => void;
   autoRotate: boolean;
+  clusters: any[];
 }
 
 export function useCanvasAnimation({
@@ -58,7 +59,8 @@ export function useCanvasAnimation({
   isDragging,
   projectedPointsRef,
   cancelTargetTransition,
-  autoRotate
+  autoRotate,
+  clusters
 }: CanvasAnimationProps) {
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -120,7 +122,8 @@ export function useCanvasAnimation({
         showTethers, primaryIdx, isComparing, selectedIdx, hoveredIdx, frame,
         randomHighlights,
         alchemicalNode,
-        alchemyActive
+        alchemyActive,
+        clusters
       });
       animationRef.current = requestAnimationFrame(render);
     };
@@ -131,6 +134,7 @@ export function useCanvasAnimation({
   }, [
     pointCloud, hoveredIdx, selectedIdx, showAxes, showTethers, autoRotate,
     zoom, axisTasteX, axisTasteY, axisTasteZ, tasteMeans, cosmicDust,
-    randomHighlights, alchemyActive, alchemicalNode, isComparing, primaryIdx
+    randomHighlights, alchemyActive, alchemicalNode, isComparing, primaryIdx,
+    clusters
   ]);
 }

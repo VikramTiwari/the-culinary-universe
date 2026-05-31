@@ -10,7 +10,7 @@ import {
   CanvasProjectedPoint
 } from './canvasHelpers';
 import { DrawSceneOptions } from './types';
-import { TASTE_COLORS } from './constants';
+import { TASTE_COLORS, TASTE_RGBS } from './constants';
 
 // Helper to convert hex taste colors to rgba with transparency
 function hexToRgba(hex: string, alpha: number): string {
@@ -27,11 +27,82 @@ export function drawScene(options: DrawSceneOptions) {
     showTethers, primaryIdx, isComparing, selectedIdx, hoveredIdx, frame,
     randomHighlights = [],
     alchemicalNode = null,
-    alchemyActive = false
+    alchemyActive = false,
+    clusters = []
   } = options;
 
   // The 3D center point of camera viewing space (translated to compound in alchemy mode)
   const centerOfSpace = (alchemyActive && alchemicalNode) ? alchemicalNode : { x: 0, y: 0, z: 0 };
+
+  // 0. Draw Alchemical Color Nebulae Cluster Background Clouds
+  if (alchemyActive && clusters && clusters.length > 0) {
+    const selectedActiveIndices = new Set([...(alchemicalNode?.positives || []), ...(alchemicalNode?.negatives || [])]);
+    const isAnySelected = selectedActiveIndices.size > 0;
+
+    // Check which clusters contain at least one selected ingredient
+    const activeClusterIds = new Set<number>();
+    if (isAnySelected) {
+      clusters.forEach((cluster, cIdx) => {
+        const hasSelected = cluster.memberIndices.some(idx => selectedActiveIndices.has(idx));
+        if (hasSelected) {
+          activeClusterIds.add(cIdx);
+        }
+      });
+    }
+
+    clusters.forEach((cluster, cIdx) => {
+      // Translate centroid coordinates relative to alchemical centerpiece (consistent with pointCloud translation!)
+      const translatedCentroid = {
+        x: cluster.centroid.x - centerOfSpace.x,
+        y: cluster.centroid.y - centerOfSpace.y,
+        z: cluster.centroid.z - centerOfSpace.z
+      };
+
+      const { px, py, scale } = project3DTo2D(translatedCentroid, { ...projectionParams, zoom });
+
+      // Determine size and opacity based on selection state
+      const isHighlighted = isAnySelected && activeClusterIds.has(cIdx);
+      const isMuted = isAnySelected && !activeClusterIds.has(cIdx);
+
+      // Default (no selections): soft 36% wash for beautiful, rich baseline saturation
+      // Highlighted: expands to 65% wash for highly vibrant, saturated centers
+      // Muted: fades to a quiet 6% shadow
+      const opacity = isHighlighted ? 0.65 : (isMuted ? 0.06 : 0.36);
+      
+      // Radius: scaled up (up to 480px) to allow a wide, ultra-diffused edge transition
+      const baseRadius = isHighlighted ? 480 : (isMuted ? 320 : 400);
+      const radius = Math.max(10, baseRadius * scale);
+
+      // Create an ultra-soft, highly feathered radial gradient on the 2D canvas context!
+      ctx.beginPath();
+      ctx.arc(px, py, radius, 0, Math.PI * 2);
+      const glowGrad = ctx.createRadialGradient(px, py, 2, px, py, radius);
+      
+      const rgbStr = TASTE_RGBS[cluster.color] || '99, 102, 241';
+      
+      // Symmetric cosine-decay curve stops: hits exactly 0.50 (half intensity) at the 0.5 midpoint!
+      const stops = [
+        { offset: 0.0, mult: 1.00 },
+        { offset: 0.1, mult: 0.98 }, // Beautifully rich core hold
+        { offset: 0.2, mult: 0.90 },
+        { offset: 0.3, mult: 0.79 },
+        { offset: 0.4, mult: 0.65 },
+        { offset: 0.5, mult: 0.50 }, // Exactly half intensity at the midpoint
+        { offset: 0.6, mult: 0.35 },
+        { offset: 0.7, mult: 0.21 },
+        { offset: 0.8, mult: 0.10 },
+        { offset: 0.9, mult: 0.02 }, // Soft feathery fade out
+        { offset: 1.0, mult: 0.00 }  // Seamless boundary melt
+      ];
+
+      stops.forEach(stop => {
+        glowGrad.addColorStop(stop.offset, `rgba(${rgbStr}, ${opacity * stop.mult})`);
+      });
+      
+      ctx.fillStyle = glowGrad;
+      ctx.fill();
+    });
+  }
 
   // Translate background cosmic dust relative to alchemical centerpiece
   const translatedCosmicDust = cosmicDust.map((star) => ({

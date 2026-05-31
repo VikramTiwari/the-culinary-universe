@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Ingredient } from '../types';
 import { TASTE_NAMES, TASTE_COLORS } from '../constants';
-import { VectorEquation } from './VectorEquation';
 
 interface FormulationBoardProps {
   positives: number[];
@@ -33,8 +32,8 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
   const [posActiveIndex, setPosActiveIndex] = useState(0);
   const [negActiveIndex, setNegActiveIndex] = useState(0);
 
-  const posInputRef = useRef<HTMLInputElement>(null);
-  const negInputRef = useRef<HTMLInputElement>(null);
+  const posInputRef = useRef<HTMLDivElement>(null);
+  const negInputRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
@@ -100,191 +99,250 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
   };
 
   return (
-    <section className="search-sidebar" style={{ width: '100%', pointerEvents: 'auto' }}>
-      <div className="search-card glass-panel" style={{ padding: '24px' }}>
-        <h2 className="search-card-title" style={{ fontSize: '1.45rem', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '18px' }}>🧪</span> Flavor Formulation Board
-        </h2>
+    <div className="search-card glass-panel" style={{ 
+      padding: '12px 20px', 
+      display: 'flex', 
+      alignItems: 'center', 
+      gap: '16px',
+      flexWrap: 'wrap',
+      boxShadow: '0 8px 32px rgba(96, 108, 56, 0.04)',
+      width: '100%',
+      boxSizing: 'border-box'
+    }}>
+      {/* Sleek Alchemical Vial Logo Indicator */}
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: '8px', 
+        borderRight: '1px solid rgba(255,255,255,0.08)', 
+        paddingRight: '16px', 
+        userSelect: 'none',
+        height: '24px'
+      }}>
+        <span style={{ fontSize: '18px', filter: 'drop-shadow(0 0 4px var(--color-glow))' }}>🧪</span>
+        <span style={{ 
+          fontFamily: '"Outfit", sans-serif', 
+          fontSize: '11px', 
+          fontWeight: 800, 
+          textTransform: 'uppercase', 
+          letterSpacing: '0.08em',
+          color: 'var(--text-muted)'
+        }}>Formulation</span>
+      </div>
 
-        {workerState === 'loading' && (
-          <div className="worker-loading-panel" style={{ padding: '30px 10px' }}>
-            <div className="loading-spinner" />
-            <p style={{ fontSize: '11.5px', fontWeight: 600, color: 'var(--text-secondary)' }}>
-              Loading 300-D vector database...
-            </p>
-          </div>
-        )}
+      {workerState === 'loading' && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div className="loading-spinner" style={{ width: '16px', height: '16px', borderWidth: '2px' }} />
+          <p style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', margin: 0 }}>
+            Loading database...
+          </p>
+        </div>
+      )}
 
-        {workerState === 'error' && (
-          <div style={{ color: 'var(--color-sweet)', fontSize: '12px', padding: '12px 0' }}>
-            <strong>WASM error:</strong> {workerError}
-          </div>
-        )}
+      {workerState === 'error' && (
+        <div style={{ color: 'var(--color-sweet)', fontSize: '12px', padding: '4px 0' }}>
+          <strong>Error:</strong> {workerError}
+        </div>
+      )}
 
-        {workerState === 'ready' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-              {/* Left Column: Add Positives */}
-              <div className="search-input-group" ref={posInputRef}>
-                <label className="search-input-label" style={{ color: 'var(--color-herbal)' }}>
-                  <span>➕</span> Base Profiles
-                </label>
-                <div className="search-field-container">
-                  <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5, fontSize: '12px' }}>🔍</span>
-                  <input
-                    ref={posInputRef}
-                    type="text"
-                    className="search-input-field"
-                    style={{ padding: '10px 12px 10px 32px', fontSize: '13.5px', borderRadius: '8px' }}
-                    placeholder="Type Tomato, Lemon, Basil..."
-                    value={posInput}
-                    onChange={(e) => {
-                      setPosInput(e.target.value);
-                      setShowPosDropdown(true);
-                      setPosActiveIndex(0);
-                    }}
-                    onFocus={() => setShowPosDropdown(true)}
-                    onKeyDown={(e) => handleDropdownKeyDown(
-                      e, filteredPosSuggestions, posActiveIndex, setPosActiveIndex,
-                      onAddPositive, setPosInput, setShowPosDropdown
-                    )}
-                  />
+      {workerState === 'ready' && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '8px',
+          fontFamily: '"Cormorant Garamond", Georgia, serif',
+          fontSize: '17px',
+          color: 'var(--text-secondary)',
+          flexGrow: 1
+        }}>
+          {/* Recipe Name Input */}
+          <input
+            type="text"
+            value={customName}
+            onChange={(e) => {
+              setCustomName(e.target.value);
+              setIsNameEdited(true);
+            }}
+            onBlur={onNameBlur}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                onNameBlur();
+                e.currentTarget.blur();
+              }
+            }}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              borderBottom: '1.5px dashed rgba(72, 127, 101, 0.4)',
+              fontFamily: '"Cormorant Garamond", Georgia, serif',
+              fontSize: '18px',
+              fontWeight: 700,
+              fontStyle: 'italic',
+              color: 'var(--color-sweet)',
+              padding: '2px 4px',
+              width: '180px',
+              outline: 'none',
+              transition: 'all 0.2s ease',
+            }}
+            placeholder="Name recipe..."
+            title="Click to rename recipe"
+          />
 
-                  {showPosDropdown && filteredPosSuggestions.length > 0 && (
-                    <div className="autocomplete-dropdown" style={{ borderRadius: '8px' }}>
-                      {filteredPosSuggestions.map((item, index) => {
-                        const dominant = getDominantTastes(item.sensory)[0];
-                        return (
-                          <div
-                            key={item.originalIndex}
-                            className={`autocomplete-item ${index === posActiveIndex ? 'active' : ''}`}
-                            style={{
-                              padding: '9px 12px',
-                              background: index === posActiveIndex ? 'rgba(96, 108, 56, 0.08)' : 'transparent',
-                            }}
-                            onClick={() => {
-                              onAddPositive(item.originalIndex);
-                              setPosInput('');
-                              setShowPosDropdown(false);
-                            }}
-                            onMouseEnter={() => setPosActiveIndex(index)}
-                          >
-                            <span>{item.name}</span>
-                            {dominant && <span className="autocomplete-item-taste">{dominant.name}</span>}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
+          {/* Equals Operator */}
+          <span className="equation-symbol" style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-secondary)', fontFamily: 'Outfit, sans-serif', margin: '0 4px', userSelect: 'none' }}>＝</span>
 
-                <div className="chip-container" style={{ minHeight: '38px', padding: '6px' }}>
-                  {positives.length === 0 && (
-                    <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontStyle: 'italic', margin: 'auto 4px' }}>
-                      No ingredients added yet.
-                    </span>
-                  )}
-                  {positives.map((idx) => {
-                    const ing = ingredients[idx];
-                    if (!ing) return null;
+          {/* Additions parenthetical list */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', minHeight: '28px' }} ref={posInputRef}>
+            <span style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-muted)', userSelect: 'none' }}>(</span>
+
+            {positives.map((idx) => {
+              const ing = ingredients[idx];
+              if (!ing) return null;
+              return (
+                <span key={idx} className="ingredient-chip positive" style={{ padding: '2px 7px', fontSize: '10.5px', gap: '4px' }}>
+                  {ing.name}
+                  <button className="chip-remove-btn" onClick={() => onRemovePositive(idx)}>×</button>
+                </span>
+              );
+            })}
+
+            <div style={{ position: 'relative', display: 'inline-block', minWidth: '100px', flexGrow: 1 }}>
+              <input
+                type="text"
+                className="inline-equation-input"
+                placeholder={positives.length === 0 ? "+ add ingredients..." : "+ add..."}
+                value={posInput}
+                onChange={(e) => {
+                  setPosInput(e.target.value);
+                  setShowPosDropdown(true);
+                  setPosActiveIndex(0);
+                }}
+                onFocus={() => setShowPosDropdown(true)}
+                onKeyDown={(e) => handleDropdownKeyDown(
+                  e, filteredPosSuggestions, posActiveIndex, setPosActiveIndex,
+                  onAddPositive, setPosInput, setShowPosDropdown
+                )}
+              />
+
+              {showPosDropdown && filteredPosSuggestions.length > 0 && (
+                <div className="autocomplete-dropdown" style={{
+                  borderRadius: '8px',
+                  width: '220px',
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  zIndex: 100,
+                  marginTop: '4px'
+                }}>
+                  {filteredPosSuggestions.map((item, index) => {
+                    const dominant = getDominantTastes(item.sensory)[0];
                     return (
-                      <span key={idx} className="ingredient-chip positive" style={{ padding: '3px 8px', fontSize: '11px' }}>
-                        {ing.name}
-                        <button className="chip-remove-btn" onClick={() => onRemovePositive(idx)}>×</button>
-                      </span>
+                      <div
+                        key={item.originalIndex}
+                        className={`autocomplete-item ${index === posActiveIndex ? 'active' : ''}`}
+                        style={{
+                          padding: '7px 10px',
+                          fontSize: '13px',
+                          background: index === posActiveIndex ? 'rgba(96, 108, 56, 0.08)' : 'transparent',
+                        }}
+                        onClick={() => {
+                          onAddPositive(item.originalIndex);
+                          setPosInput('');
+                          setShowPosDropdown(false);
+                        }}
+                        onMouseEnter={() => setPosActiveIndex(index)}
+                      >
+                        <span>{item.name}</span>
+                        {dominant && <span className="autocomplete-item-taste">{dominant.name}</span>}
+                      </div>
                     );
                   })}
                 </div>
-              </div>
-
-              {/* Right Column: Add Negatives */}
-              <div className="search-input-group" ref={negInputRef}>
-                <label className="search-input-label" style={{ color: 'var(--color-sweet)' }}>
-                  <span>➖</span> Exclude Notes
-                </label>
-                <div className="search-field-container">
-                  <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5, fontSize: '12px' }}>🔍</span>
-                  <input
-                    ref={negInputRef}
-                    type="text"
-                    className="search-input-field"
-                    style={{ padding: '10px 12px 10px 32px', fontSize: '13.5px', borderRadius: '8px' }}
-                    placeholder="Type Sugar, Bacon, Honey..."
-                    value={negInput}
-                    onChange={(e) => {
-                      setNegInput(e.target.value);
-                      setShowNegDropdown(true);
-                      setNegActiveIndex(0);
-                    }}
-                    onFocus={() => setShowNegDropdown(true)}
-                    onKeyDown={(e) => handleDropdownKeyDown(
-                      e, filteredNegSuggestions, negActiveIndex, setNegActiveIndex,
-                      onAddNegative, setNegInput, setShowNegDropdown
-                    )}
-                  />
-
-                  {showNegDropdown && filteredNegSuggestions.length > 0 && (
-                    <div className="autocomplete-dropdown" style={{ borderRadius: '8px' }}>
-                      {filteredNegSuggestions.map((item, index) => {
-                        const dominant = getDominantTastes(item.sensory)[0];
-                        return (
-                          <div
-                            key={item.originalIndex}
-                            className={`autocomplete-item ${index === negActiveIndex ? 'active' : ''}`}
-                            style={{
-                              padding: '9px 12px',
-                              background: index === negActiveIndex ? 'rgba(96, 108, 56, 0.08)' : 'transparent',
-                            }}
-                            onClick={() => {
-                              onAddNegative(item.originalIndex);
-                              setNegInput('');
-                              setShowNegDropdown(false);
-                            }}
-                            onMouseEnter={() => setNegActiveIndex(index)}
-                          >
-                            <span>{item.name}</span>
-                            {dominant && <span className="autocomplete-item-taste">{dominant.name}</span>}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                <div className="chip-container" style={{ minHeight: '38px', padding: '6px' }}>
-                  {negatives.length === 0 && (
-                    <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontStyle: 'italic', margin: 'auto 4px' }}>
-                      No ingredients subtracted.
-                    </span>
-                  )}
-                  {negatives.map((idx) => {
-                    const ing = ingredients[idx];
-                    if (!ing) return null;
-                    return (
-                      <span key={idx} className="ingredient-chip negative" style={{ padding: '3px 8px', fontSize: '11px' }}>
-                        {ing.name}
-                        <button className="chip-remove-btn" onClick={() => onRemoveNegative(idx)}>×</button>
-                      </span>
-                    );
-                  })}
-                </div>
-              </div>
+              )}
             </div>
 
-            <VectorEquation
-              positives={positives}
-              negatives={negatives}
-              ingredients={ingredients}
-              customName={customName}
-              onNameChange={(newName) => {
-                setCustomName(newName);
-                setIsNameEdited(true);
-              }}
-              onNameBlur={onNameBlur}
-            />
+            <span style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-muted)', userSelect: 'none' }}>)</span>
           </div>
-        )}
-      </div>
-    </section>
+
+          {/* Subtraction Operator */}
+          <span className="equation-symbol" style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-secondary)', fontFamily: 'Outfit, sans-serif', margin: '0 6px', userSelect: 'none' }}>－</span>
+
+          {/* Exclusions parenthetical list */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', minHeight: '28px' }} ref={negInputRef}>
+            <span style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-muted)', userSelect: 'none' }}>(</span>
+
+            {negatives.map((idx) => {
+              const ing = ingredients[idx];
+              if (!ing) return null;
+              return (
+                <span key={idx} className="ingredient-chip negative" style={{ padding: '2px 7px', fontSize: '10.5px', gap: '4px' }}>
+                  {ing.name}
+                  <button className="chip-remove-btn" onClick={() => onRemoveNegative(idx)}>×</button>
+                </span>
+              );
+            })}
+
+            <div style={{ position: 'relative', display: 'inline-block', minWidth: '100px', flexGrow: 1 }}>
+              <input
+                type="text"
+                className="inline-equation-input"
+                placeholder={negatives.length === 0 ? "- exclude flavors..." : "- subtract..."}
+                value={negInput}
+                onChange={(e) => {
+                  setNegInput(e.target.value);
+                  setShowNegDropdown(true);
+                  setNegActiveIndex(0);
+                }}
+                onFocus={() => setShowNegDropdown(true)}
+                onKeyDown={(e) => handleDropdownKeyDown(
+                  e, filteredNegSuggestions, negActiveIndex, setNegActiveIndex,
+                  onAddNegative, setNegInput, setShowNegDropdown
+                )}
+              />
+
+              {showNegDropdown && filteredNegSuggestions.length > 0 && (
+                <div className="autocomplete-dropdown" style={{
+                  borderRadius: '8px',
+                  width: '220px',
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  zIndex: 100,
+                  marginTop: '4px'
+                }}>
+                  {filteredNegSuggestions.map((item, index) => {
+                    const dominant = getDominantTastes(item.sensory)[0];
+                    return (
+                      <div
+                        key={item.originalIndex}
+                        className={`autocomplete-item ${index === negActiveIndex ? 'active' : ''}`}
+                        style={{
+                          padding: '7px 10px',
+                          fontSize: '13px',
+                          background: index === negActiveIndex ? 'rgba(96, 108, 56, 0.08)' : 'transparent',
+                        }}
+                        onClick={() => {
+                          onAddNegative(item.originalIndex);
+                          setNegInput('');
+                          setShowNegDropdown(false);
+                        }}
+                        onMouseEnter={() => setNegActiveIndex(index)}
+                      >
+                        <span>{item.name}</span>
+                        {dominant && <span className="autocomplete-item-taste">{dominant.name}</span>}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <span style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-muted)', userSelect: 'none' }}>)</span>
+          </div>
+
+        </div>
+      )}
+    </div>
   );
 };

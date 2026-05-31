@@ -479,3 +479,31 @@
   line-height: 1.5;
   margin: 0;
 }
+
+/* Inline Equation Custom Input Field Styles */
+.inline-equation-input {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px dashed transparent !important;
+  outline: none !important;
+  font-size: 13.5px !important;
+  font-family: 'Outfit', sans-serif !important;
+  color: var(--text-primary) !important;
+  padding: 4px 0 !important;
+  min-width: 90px !important;
+  flex-grow: 1;
+  transition: all 0.2s ease !important;
+  box-shadow: none !important;
+}
+
+.inline-equation-input:focus {
+  border-bottom-color: rgba(96, 108, 56, 0.2) !important;
+  box-shadow: none !important;
+}
+
+.inline-equation-input::placeholder {
+  color: var(--text-muted) !important;
+  opacity: 0.55 !important;
+  font-style: italic;
+}
+

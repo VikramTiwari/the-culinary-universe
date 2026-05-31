@@ -111,40 +111,54 @@ export default function VectorMath({ alchemyActive = false }: VectorMathProps) {
 
       {/* Immersive Alchemy Workstation overlays */}
       {alchemyActive && (
-        <div style={{
-          position: 'absolute',
-          left: '24px',
-          top: '24px',
-          bottom: '24px',
-          width: '380px',
-          zIndex: 10,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '16px',
-          pointerEvents: 'auto',
-          overflowY: 'auto',
-          paddingRight: '4px'
-        }} id="alchemy-workbench-hud">
-          <FormulationBoard
-            positives={positives}
-            negatives={negatives}
-            ingredients={ingredients}
-            onAddPositive={(idx) => setPositives((prev) => [...prev, idx])}
-            onRemovePositive={(idx) => setPositives((prev) => prev.filter((p) => p !== idx))}
-            onAddNegative={(idx) => setNegatives((prev) => [...prev, idx])}
-            onRemoveNegative={(idx) => setNegatives((prev) => prev.filter((n) => n !== idx))}
-            workerState={workerState}
-            workerError={workerError}
-            customName={customName}
-            setCustomName={setCustomName}
-            setIsNameEdited={setIsNameEdited}
-            onNameBlur={() => setUrlName(customName)}
-          />
-          <SensorySignature
-            sensory={synthesizedSensory}
-            isEmpty={positives.length === 0 && negatives.length === 0}
-          />
-        </div>
+        <>
+          {/* Top Floating Alchemical Equation Header Banner */}
+          <div style={{
+            position: 'absolute',
+            left: '24px',
+            top: '24px',
+            right: '24px',
+            zIndex: 10,
+            pointerEvents: 'auto'
+          }} id="alchemy-header-hud">
+            <FormulationBoard
+              positives={positives}
+              negatives={negatives}
+              ingredients={ingredients}
+              onAddPositive={(idx) => setPositives((prev) => [...prev, idx])}
+              onRemovePositive={(idx) => setPositives((prev) => prev.filter((p) => p !== idx))}
+              onAddNegative={(idx) => setNegatives((prev) => [...prev, idx])}
+              onRemoveNegative={(idx) => setNegatives((prev) => prev.filter((n) => n !== idx))}
+              workerState={workerState}
+              workerError={workerError}
+              customName={customName}
+              setCustomName={setCustomName}
+              setIsNameEdited={setIsNameEdited}
+              onNameBlur={() => setUrlName(customName)}
+            />
+          </div>
+
+          {/* Left Floating Sensory Signature Sidebar */}
+          <div style={{
+            position: 'absolute',
+            left: '24px',
+            top: '96px',
+            bottom: '24px',
+            width: '380px',
+            zIndex: 10,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+            pointerEvents: 'auto',
+            overflowY: 'auto',
+            paddingRight: '4px'
+          }} id="alchemy-workbench-hud">
+            <SensorySignature
+              sensory={synthesizedSensory}
+              isEmpty={positives.length === 0 && negatives.length === 0}
+            />
+          </div>
+        </>
       )}
     </main>
   );

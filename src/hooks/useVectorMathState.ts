@@ -1,13 +1,4 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Ingredient } from '../types';
-import {
-  calculateUmapCenterOffset,
-  calculateTasteMeans,
-  generateCosmicDust,
-  generatePointCloud,
-  performKMeansClustering,
-  findNearestNeighbors3D
-} from '../math';
 import { useMapInteraction } from './useMapInteraction';
 import { useVectorSearchWorker } from './useVectorSearchWorker';
 import { useCanvasAnimation } from './useCanvasAnimation';
@@ -17,10 +8,19 @@ import {
   determineDefaultRecipeName
 } from './useAlchemicalCalculations';
 import { useAlchemicalURLSync } from './useAlchemicalURLSync';
+import { useIngredientLoader } from './useIngredientLoader';
+import { useMapHighlights } from './useMapHighlights';
 
 export function useVectorMathState(alchemyActive: boolean) {
-  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    ingredients,
+    error,
+    cosmicDust,
+    tasteMeans,
+    pointCloud,
+    clusters
+  } = useIngredientLoader();
+
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   // URL State Synced Params Hook (Disables standard sync on lab page)
@@ -51,7 +51,13 @@ export function useVectorMathState(alchemyActive: boolean) {
     if (alchemyActive) return false;
     return userWantsAutoRotate;
   });
-  const [hoveredNeighbors, setHoveredNeighbors] = useState<{ name: string; score: number }[]>([]);
+
+  const { randomHighlights, hoveredNeighbors } = useMapHighlights(
+    autoRotate,
+    pointCloud,
+    alchemyActive,
+    primaryIdx
+  );
 
   // Alchemist workspace state
   const [positives, setPositives] = useState<number[]>([]);
@@ -98,13 +104,6 @@ export function useVectorMathState(alchemyActive: boolean) {
 
   const currentCoordsRef = useRef<{ x: number; y: number; z: number }[]>([]);
   const animationRef = useRef<number | null>(null);
-  const cosmicDust = useMemo(() => generateCosmicDust(60), []);
-  const umapCenterOffset = useMemo(() => calculateUmapCenterOffset(ingredients), [ingredients]);
-  const tasteMeans = useMemo(() => calculateTasteMeans(ingredients), [ingredients]);
-
-  const pointCloud = useMemo(() => generatePointCloud(ingredients, umapCenterOffset), [ingredients, umapCenterOffset]);
-  const clusters = useMemo(() => performKMeansClustering(pointCloud), [pointCloud]);
-  const [randomHighlights, setRandomHighlights] = useState<number[]>([]);
 
   // Real-time sensory, zoom, and coordinate projections for alchemist workbench
   const { alchemicalNode, synthesizedSensory, dynamicZoom } = useAlchemicalCalculations({
@@ -189,38 +188,6 @@ export function useVectorMathState(alchemyActive: boolean) {
   useEffect(() => {
     if (alchemyActive) setAutoRotate(false);
   }, [alchemyActive]);
-
-  useEffect(() => {
-    fetch('./ingredients.json')
-      .then((res) => res.json())
-      .then((data: Ingredient[]) => setIngredients(data))
-      .catch(() => setError('Failed to load ingredient metadata'));
-  }, []);
-
-  useEffect(() => {
-    if (!autoRotate || pointCloud.length === 0 || alchemyActive) {
-      setRandomHighlights([]);
-      return;
-    }
-    const selectRandom = () => {
-      const selected: number[] = [];
-      const len = pointCloud.length;
-      while (selected.length < Math.min(10, len)) {
-        const rand = Math.floor(Math.random() * len);
-        if (!selected.includes(rand)) selected.push(rand);
-      }
-      setRandomHighlights(selected);
-    };
-    selectRandom();
-    const interval = setInterval(selectRandom, 4000);
-    return () => clearInterval(interval);
-  }, [autoRotate, pointCloud.length, alchemyActive]);
-
-  useEffect(() => {
-    if (primaryIdx === null || pointCloud.length === 0 || alchemyActive) return setHoveredNeighbors([]);
-    const candidates = findNearestNeighbors3D(primaryIdx, pointCloud);
-    setHoveredNeighbors(candidates.slice(0, 3));
-  }, [primaryIdx, pointCloud, alchemyActive]);
 
   // Canvas animation loop handled via delegated custom hook
   useCanvasAnimation({

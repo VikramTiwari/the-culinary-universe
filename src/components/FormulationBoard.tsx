@@ -1,7 +1,10 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React from 'react';
 import { Ingredient } from '../types';
-import { TASTE_NAMES, TASTE_COLORS } from '../constants';
 import { useRouter } from '../hooks/useRouter';
+import { IngredientChip } from './IngredientChip';
+import { AutocompleteDropdown } from './AutocompleteDropdown';
+import { useFormulationState } from '../hooks/useFormulationState';
+import { RecipeNameInput } from './RecipeNameInput';
 
 interface FormulationBoardProps {
   positives: number[];
@@ -27,78 +30,29 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
   onNameBlur
 }) => {
   const { navigate } = useRouter();
-  const [posInput, setPosInput] = useState('');
-  const [negInput, setNegInput] = useState('');
-  const [showPosDropdown, setShowPosDropdown] = useState(false);
-  const [showNegDropdown, setShowNegDropdown] = useState(false);
-  const [posActiveIndex, setPosActiveIndex] = useState(0);
-  const [negActiveIndex, setNegActiveIndex] = useState(0);
-
-  const posInputRef = useRef<HTMLDivElement>(null);
-  const negInputRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleOutsideClick = (e: MouseEvent) => {
-      if (posInputRef.current && !posInputRef.current.contains(e.target as Node)) setShowPosDropdown(false);
-      if (negInputRef.current && !negInputRef.current.contains(e.target as Node)) setShowNegDropdown(false);
-    };
-    document.addEventListener('mousedown', handleOutsideClick);
-    return () => document.removeEventListener('mousedown', handleOutsideClick);
-  }, []);
-
-  const getFilteredSuggestions = (input: string, excluded: number[]) => {
-    if (!input.trim()) return [];
-    const query = input.toLowerCase();
-    return ingredients
-      .map((ing, originalIndex) => ({ ...ing, originalIndex }))
-      .filter((ing) => ing.name.toLowerCase().includes(query) && !excluded.includes(ing.originalIndex))
-      .slice(0, 6);
-  };
-
-  const filteredPosSuggestions = useMemo(
-    () => getFilteredSuggestions(posInput, [...positives, ...negatives]),
-    [posInput, ingredients, positives, negatives]
-  );
-
-  const filteredNegSuggestions = useMemo(
-    () => getFilteredSuggestions(negInput, [...positives, ...negatives]),
-    [negInput, ingredients, positives, negatives]
-  );
-
-  const handleDropdownKeyDown = (
-    e: React.KeyboardEvent<HTMLInputElement>,
-    suggestions: any[],
-    activeIndex: number,
-    setActiveIndex: React.Dispatch<React.SetStateAction<number>>,
-    onAdd: (idx: number) => void,
-    setInput: React.Dispatch<React.SetStateAction<string>>,
-    setShowDropdown: React.Dispatch<React.SetStateAction<boolean>>
-  ) => {
-    if (!suggestions.length) return;
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      setActiveIndex((prev) => (prev + 1) % suggestions.length);
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      setActiveIndex((prev) => (prev - 1 + suggestions.length) % suggestions.length);
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      onAdd(suggestions[activeIndex].originalIndex);
-      setInput('');
-      setShowDropdown(false);
-      setActiveIndex(0);
-    } else if (e.key === 'Escape') {
-      setShowDropdown(false);
-    }
-  };
-
-  const getDominantTastes = (sensory: number[]) => {
-    return sensory
-      .map((val, idx) => ({ name: TASTE_NAMES[idx], color: TASTE_COLORS[idx], val }))
-      .filter((t) => t.val > 0.3)
-      .sort((a, b) => b.val - a.val)
-      .slice(0, 2);
-  };
+  const {
+    posInput,
+    setPosInput,
+    negInput,
+    setNegInput,
+    showPosDropdown,
+    setShowPosDropdown,
+    showNegDropdown,
+    setShowNegDropdown,
+    posActiveIndex,
+    setPosActiveIndex,
+    negActiveIndex,
+    setNegActiveIndex,
+    posInputRef,
+    negInputRef,
+    filteredPosSuggestions,
+    filteredNegSuggestions,
+    handleDropdownKeyDown
+  } = useFormulationState({
+    ingredients,
+    positives,
+    negatives
+  });
 
   return (
     <div style={{ 
@@ -159,36 +113,11 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
           flexGrow: 1
         }}>
           {/* Recipe Name Input */}
-          <input
-            type="text"
-            value={customName}
-            onChange={(e) => {
-              setCustomName(e.target.value);
-              setIsNameEdited(true);
-            }}
-            onBlur={onNameBlur}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                onNameBlur();
-                e.currentTarget.blur();
-              }
-            }}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              borderBottom: '1.5px dashed rgba(72, 127, 101, 0.4)',
-              fontFamily: '"Cormorant Garamond", Georgia, serif',
-              fontSize: '21px',
-              fontWeight: 700,
-              fontStyle: 'italic',
-              color: 'var(--color-sweet)',
-              padding: '2px 4px',
-              width: '210px',
-              outline: 'none',
-              transition: 'all 0.2s ease',
-            }}
-            placeholder="Name recipe..."
-            title="Click to rename recipe"
+          <RecipeNameInput
+            customName={customName}
+            setCustomName={setCustomName}
+            setIsNameEdited={setIsNameEdited}
+            onNameBlur={onNameBlur}
           />
 
           {/* Equals Operator */}
@@ -202,10 +131,12 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
               const ing = ingredients[idx];
               if (!ing) return null;
               return (
-                <span key={idx} className="ingredient-chip positive" style={{ padding: '3px 9px', fontSize: '12.5px', gap: '4px' }}>
-                  {ing.name}
-                  <button className="chip-remove-btn" onClick={() => onRemovePositive(idx)}>×</button>
-                </span>
+                <IngredientChip
+                  key={idx}
+                  name={ing.name}
+                  onRemove={() => onRemovePositive(idx)}
+                  type="positive"
+                />
               );
             })}
 
@@ -234,39 +165,16 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
               />
 
               {showPosDropdown && filteredPosSuggestions.length > 0 && (
-                <div className="autocomplete-dropdown" style={{
-                  borderRadius: '8px',
-                  width: '220px',
-                  position: 'absolute',
-                  top: '100%',
-                  left: 0,
-                  zIndex: 100,
-                  marginTop: '4px'
-                }}>
-                  {filteredPosSuggestions.map((item, index) => {
-                    const dominant = getDominantTastes(item.sensory)[0];
-                    return (
-                      <div
-                        key={item.originalIndex}
-                        className={`autocomplete-item ${index === posActiveIndex ? 'active' : ''}`}
-                        style={{
-                          padding: '7px 10px',
-                          fontSize: '15px',
-                          background: index === posActiveIndex ? 'rgba(96, 108, 56, 0.08)' : 'transparent',
-                        }}
-                        onClick={() => {
-                          onAddPositive(item.originalIndex);
-                          setPosInput('');
-                          setShowPosDropdown(false);
-                        }}
-                        onMouseEnter={() => setPosActiveIndex(index)}
-                      >
-                        <span>{item.name}</span>
-                        {dominant && <span className="autocomplete-item-taste">{dominant.name}</span>}
-                      </div>
-                    );
-                  })}
-                </div>
+                <AutocompleteDropdown
+                  suggestions={filteredPosSuggestions}
+                  activeIndex={posActiveIndex}
+                  onSelect={(originalIndex) => {
+                    onAddPositive(originalIndex);
+                    setPosInput('');
+                    setShowPosDropdown(false);
+                  }}
+                  onHoverItem={setPosActiveIndex}
+                />
               )}
             </div>
 
@@ -284,10 +192,12 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
               const ing = ingredients[idx];
               if (!ing) return null;
               return (
-                <span key={idx} className="ingredient-chip negative" style={{ padding: '3px 9px', fontSize: '12.5px', gap: '4px' }}>
-                  {ing.name}
-                  <button className="chip-remove-btn" onClick={() => onRemoveNegative(idx)}>×</button>
-                </span>
+                <IngredientChip
+                  key={idx}
+                  name={ing.name}
+                  onRemove={() => onRemoveNegative(idx)}
+                  type="negative"
+                />
               );
             })}
 
@@ -316,39 +226,16 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
               />
 
               {showNegDropdown && filteredNegSuggestions.length > 0 && (
-                <div className="autocomplete-dropdown" style={{
-                  borderRadius: '8px',
-                  width: '220px',
-                  position: 'absolute',
-                  top: '100%',
-                  left: 0,
-                  zIndex: 100,
-                  marginTop: '4px'
-                }}>
-                  {filteredNegSuggestions.map((item, index) => {
-                    const dominant = getDominantTastes(item.sensory)[0];
-                    return (
-                      <div
-                        key={item.originalIndex}
-                        className={`autocomplete-item ${index === negActiveIndex ? 'active' : ''}`}
-                        style={{
-                          padding: '7px 10px',
-                          fontSize: '15px',
-                          background: index === negActiveIndex ? 'rgba(96, 108, 56, 0.08)' : 'transparent',
-                        }}
-                        onClick={() => {
-                          onAddNegative(item.originalIndex);
-                          setNegInput('');
-                          setShowNegDropdown(false);
-                        }}
-                        onMouseEnter={() => setNegActiveIndex(index)}
-                      >
-                        <span>{item.name}</span>
-                        {dominant && <span className="autocomplete-item-taste">{dominant.name}</span>}
-                      </div>
-                    );
-                  })}
-                </div>
+                <AutocompleteDropdown
+                  suggestions={filteredNegSuggestions}
+                  activeIndex={negActiveIndex}
+                  onSelect={(originalIndex) => {
+                    onAddNegative(originalIndex);
+                    setNegInput('');
+                    setShowNegDropdown(false);
+                  }}
+                  onHoverItem={setNegActiveIndex}
+                />
               )}
             </div>
 
@@ -395,3 +282,4 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
     </div>
   );
 };
+

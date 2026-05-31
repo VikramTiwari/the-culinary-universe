@@ -335,7 +335,7 @@ export function drawScene(options: DrawSceneOptions) {
     // Render clean text label positioned next to the alchemical node core
     const labelX = px + radius + 15;
     const labelY = py + 5;
-    ctx.font = 'bold italic 20px "Cormorant Garamond", Georgia, serif';
+    ctx.font = 'bold italic 24px "Cormorant Garamond", Georgia, serif';
     ctx.textAlign = 'left';
 
     ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';

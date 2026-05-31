@@ -49,7 +49,7 @@ export function drawAxes(
     { x: 0, y: 0, z: 220, color: '#212529', label: getLabel(axisTasteZ, 'SALTY (+Z)') }
   ];
 
-  ctx.font = 'italic 700 16px "Cormorant Garamond", Georgia, serif';
+  ctx.font = 'italic 700 20px "Cormorant Garamond", Georgia, serif';
   ctx.fillStyle = ctx.strokeStyle = '#212529';
 
   axes.forEach((axis) => {
@@ -77,7 +77,7 @@ export function drawNeighborsTethers(ctx: CanvasRenderingContext2D, projected: C
   ctx.lineWidth = 1.0;
   ctx.strokeStyle = 'rgba(96, 108, 56, 0.35)';
   ctx.fillStyle = 'rgba(33, 37, 41, 0.75)';
-  ctx.font = 'italic 500 15px "Cormorant Garamond", Georgia, serif';
+  ctx.font = 'italic 500 18px "Cormorant Garamond", Georgia, serif';
 
   tethers.slice(0, 3).forEach((t) => {
     ctx.globalAlpha = 0.55 * t.node.scale;
@@ -193,7 +193,7 @@ export function drawActiveNode(
 
   const labelX = p.px + radius + 10;
   const labelY = p.py + 4;
-  ctx.font = 'italic 700 17px "Cormorant Garamond", Georgia, serif';
+  ctx.font = 'italic 700 21px "Cormorant Garamond", Georgia, serif';
   ctx.textAlign = 'left';
 
   ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';

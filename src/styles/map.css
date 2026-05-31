@@ -32,7 +32,7 @@
 
 .hud-header-subtitle span {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 500;
   font-style: italic;
   letter-spacing: 0.05em;
@@ -50,7 +50,7 @@
 }
 
 .hud-header-desc {
-  font-size: 15px;
+  font-size: 17px;
   color: var(--text-secondary);
   line-height: 1.6;
   margin-top: 6px;
@@ -74,7 +74,7 @@
 
 .hud-card-title-label {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 16.5px;
+  font-size: 18.5px;
   font-weight: 600;
   font-style: italic;
   letter-spacing: 0.02em;
@@ -96,7 +96,7 @@
 }
 
 .hud-card-section-label {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.15em;
@@ -118,14 +118,14 @@
 .sensory-label-row {
   display: flex;
   justify-content: space-between;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--text-muted);
 }
 
 .sensory-label-row span:last-child {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 17.5px;
+  font-size: 19.5px;
   font-weight: 700;
   color: var(--text-primary);
 }
@@ -160,7 +160,7 @@
 
 .hud-legend-title {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 16.5px;
+  font-size: 18.5px;
   font-weight: 600;
   font-style: italic;
   letter-spacing: 0.02em;
@@ -186,7 +186,7 @@
 }
 
 .hud-legend-label {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--text-secondary);
 }
@@ -208,7 +208,7 @@
   align-items: center;
   gap: 8px;
   padding: 6px 12px;
-  font-size: 12.5px;
+  font-size: 14.5px;
   font-family: 'Outfit', monospace;
   font-weight: 500;
   letter-spacing: 0.05em;
@@ -234,7 +234,7 @@
 
 .hud-controls-title {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 18.5px;
+  font-size: 20.5px;
   font-weight: 600;
   font-style: italic;
   letter-spacing: 0.02em;
@@ -254,7 +254,7 @@
   background: transparent;
   color: var(--text-secondary);
   border-radius: 6px;
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -282,7 +282,7 @@
 }
 
 .hud-btn-state {
-  font-size: 12.5px;
+  font-size: 14.5px;
   font-family: monospace;
   opacity: 0.8;
 }
@@ -320,7 +320,7 @@
   align-items: center;
   gap: 6px;
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 16.5px;
+  font-size: 18.5px;
   font-weight: 600;
   font-style: italic;
   letter-spacing: 0.02em;
@@ -337,7 +337,7 @@
   display: flex;
   justify-content: space-between;
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 17.5px;
+  font-size: 19.5px;
   font-weight: 600;
   color: var(--text-secondary);
   border-bottom: 1px dashed rgba(96, 108, 56, 0.08);

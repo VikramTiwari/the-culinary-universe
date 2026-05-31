@@ -1,4 +1,8 @@
 /* Global Styles & Variables - Artisanal Parchment & Sage Culinary Theme */
+html {
+  font-size: 112.5%;
+}
+
 :root {
   --bg-primary: #ede9df;       /* Warm Aged Linen Parchment */
   --bg-secondary: #e2dcd0;     /* Warm Plaster / Plinth Linen */

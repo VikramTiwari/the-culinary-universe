@@ -13,7 +13,7 @@ export const SensorySignature: React.FC<SensorySignatureProps> = ({ sensory, isE
       left: 0,
       right: 0,
       bottom: 0,
-      height: '42px',
+      height: '48px',
       background: 'rgba(237, 233, 223, 0.72)', // Richer translucent linen plaster to maintain absolute text contrast
       backdropFilter: 'blur(16px) saturate(140%)',
       borderTop: '1px solid rgba(96, 108, 56, 0.15)', // Soft Sage Olive hairline
@@ -56,7 +56,7 @@ export const SensorySignature: React.FC<SensorySignatureProps> = ({ sensory, isE
             }} />
             
             <span style={{
-              fontSize: '9.5px',
+              fontSize: '12.5px',
               fontWeight: 800,
               textTransform: 'uppercase',
               letterSpacing: '0.06em',
@@ -68,7 +68,7 @@ export const SensorySignature: React.FC<SensorySignatureProps> = ({ sensory, isE
             </span>
             
             <span style={{
-              fontSize: '10px',
+              fontSize: '13px',
               fontWeight: 700,
               color: val > 0 ? color : 'var(--text-muted)',
               fontFamily: '"Outfit", sans-serif',

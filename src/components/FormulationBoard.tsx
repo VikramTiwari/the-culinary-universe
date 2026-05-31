@@ -124,7 +124,7 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
       }}>
         <span style={{ 
           fontFamily: '"Outfit", sans-serif', 
-          fontSize: '11px', 
+          fontSize: '13.5px', 
           fontWeight: 800, 
           textTransform: 'uppercase', 
           letterSpacing: '0.08em',
@@ -135,14 +135,14 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
       {workerState === 'loading' && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <div className="loading-spinner" style={{ width: '16px', height: '16px', borderWidth: '2px' }} />
-          <p style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', margin: 0 }}>
+          <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', margin: 0 }}>
             Loading database...
           </p>
         </div>
       )}
 
       {workerState === 'error' && (
-        <div style={{ color: 'var(--color-sweet)', fontSize: '12px', padding: '4px 0' }}>
+        <div style={{ color: 'var(--color-sweet)', fontSize: '14px', padding: '4px 0' }}>
           <strong>Error:</strong> {workerError}
         </div>
       )}
@@ -154,7 +154,7 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
           flexWrap: 'wrap',
           gap: '8px',
           fontFamily: '"Cormorant Garamond", Georgia, serif',
-          fontSize: '17px',
+          fontSize: '19px',
           color: 'var(--text-secondary)',
           flexGrow: 1
         }}>
@@ -178,12 +178,12 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
               border: 'none',
               borderBottom: '1.5px dashed rgba(72, 127, 101, 0.4)',
               fontFamily: '"Cormorant Garamond", Georgia, serif',
-              fontSize: '18px',
+              fontSize: '21px',
               fontWeight: 700,
               fontStyle: 'italic',
               color: 'var(--color-sweet)',
               padding: '2px 4px',
-              width: '180px',
+              width: '210px',
               outline: 'none',
               transition: 'all 0.2s ease',
             }}
@@ -192,17 +192,17 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
           />
 
           {/* Equals Operator */}
-          <span className="equation-symbol" style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-secondary)', fontFamily: 'Outfit, sans-serif', margin: '0 4px', userSelect: 'none' }}>＝</span>
+          <span className="equation-symbol" style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-secondary)', fontFamily: 'Outfit, sans-serif', margin: '0 4px', userSelect: 'none' }}>＝</span>
 
           {/* Additions parenthetical list */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', minHeight: '28px' }} ref={posInputRef}>
-            <span style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-muted)', userSelect: 'none' }}>(</span>
+            <span style={{ fontSize: '21px', fontWeight: 600, color: 'var(--text-muted)', userSelect: 'none' }}>(</span>
 
             {positives.map((idx) => {
               const ing = ingredients[idx];
               if (!ing) return null;
               return (
-                <span key={idx} className="ingredient-chip positive" style={{ padding: '2px 7px', fontSize: '10.5px', gap: '4px' }}>
+                <span key={idx} className="ingredient-chip positive" style={{ padding: '3px 9px', fontSize: '12.5px', gap: '4px' }}>
                   {ing.name}
                   <button className="chip-remove-btn" onClick={() => onRemovePositive(idx)}>×</button>
                 </span>
@@ -251,7 +251,7 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
                         className={`autocomplete-item ${index === posActiveIndex ? 'active' : ''}`}
                         style={{
                           padding: '7px 10px',
-                          fontSize: '13px',
+                          fontSize: '15px',
                           background: index === posActiveIndex ? 'rgba(96, 108, 56, 0.08)' : 'transparent',
                         }}
                         onClick={() => {
@@ -270,21 +270,21 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
               )}
             </div>
 
-            <span style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-muted)', userSelect: 'none' }}>)</span>
+            <span style={{ fontSize: '21px', fontWeight: 600, color: 'var(--text-muted)', userSelect: 'none' }}>)</span>
           </div>
 
           {/* Subtraction Operator */}
-          <span className="equation-symbol" style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-secondary)', fontFamily: 'Outfit, sans-serif', margin: '0 6px', userSelect: 'none' }}>－</span>
+          <span className="equation-symbol" style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-secondary)', fontFamily: 'Outfit, sans-serif', margin: '0 6px', userSelect: 'none' }}>－</span>
 
           {/* Exclusions parenthetical list */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', minHeight: '28px' }} ref={negInputRef}>
-            <span style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-muted)', userSelect: 'none' }}>(</span>
+            <span style={{ fontSize: '21px', fontWeight: 600, color: 'var(--text-muted)', userSelect: 'none' }}>(</span>
 
             {negatives.map((idx) => {
               const ing = ingredients[idx];
               if (!ing) return null;
               return (
-                <span key={idx} className="ingredient-chip negative" style={{ padding: '2px 7px', fontSize: '10.5px', gap: '4px' }}>
+                <span key={idx} className="ingredient-chip negative" style={{ padding: '3px 9px', fontSize: '12.5px', gap: '4px' }}>
                   {ing.name}
                   <button className="chip-remove-btn" onClick={() => onRemoveNegative(idx)}>×</button>
                 </span>
@@ -333,7 +333,7 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
                         className={`autocomplete-item ${index === negActiveIndex ? 'active' : ''}`}
                         style={{
                           padding: '7px 10px',
-                          fontSize: '13px',
+                          fontSize: '15px',
                           background: index === negActiveIndex ? 'rgba(96, 108, 56, 0.08)' : 'transparent',
                         }}
                         onClick={() => {
@@ -352,7 +352,7 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
               )}
             </div>
 
-            <span style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-muted)', userSelect: 'none' }}>)</span>
+            <span style={{ fontSize: '21px', fontWeight: 600, color: 'var(--text-muted)', userSelect: 'none' }}>)</span>
           </div>
 
         </div>
@@ -368,7 +368,7 @@ export const FormulationBoard: React.FC<FormulationBoardProps> = ({
           borderRadius: '99px',
           padding: '6px 14px',
           fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
-          fontSize: '11px',
+          fontSize: '13.5px',
           fontWeight: 600,
           cursor: 'pointer',
           display: 'inline-flex',

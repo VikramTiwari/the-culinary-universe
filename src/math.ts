@@ -243,3 +243,19 @@ export function performKMeansClustering(points: PointCloudItem[]): KMeansCluster
 
   return clusters;
 }
+
+// Pure function to calculate nearest neighbors in 3D UMAP coordinates
+export function findNearestNeighbors3D(
+  targetIdx: number,
+  pointCloud: { index: number; name: string; x: number; y: number; z: number }[]
+): { name: string; score: number }[] {
+  const target = pointCloud.find((p) => p.index === targetIdx);
+  if (!target) return [];
+  return pointCloud
+    .filter((p) => p.index !== targetIdx)
+    .map((p) => ({
+      name: p.name,
+      score: Math.sqrt((p.x - target.x) ** 2 + (p.y - target.y) ** 2 + (p.z - target.z) ** 2)
+    }))
+    .sort((a, b) => a.score - b.score);
+}

@@ -5,13 +5,17 @@ import {
   calculateTasteMeans,
   generateCosmicDust,
   generatePointCloud,
-  performKMeansClustering
+  performKMeansClustering,
+  findNearestNeighbors3D
 } from '../math';
 import { useMapInteraction } from './useMapInteraction';
 import { useVectorSearchWorker } from './useVectorSearchWorker';
 import { useCanvasAnimation } from './useCanvasAnimation';
 import { useMapSearchParams } from './useMapSearchParams';
-import { useAlchemicalCalculations } from './useAlchemicalCalculations';
+import {
+  useAlchemicalCalculations,
+  determineDefaultRecipeName
+} from './useAlchemicalCalculations';
 import { useAlchemicalURLSync } from './useAlchemicalURLSync';
 
 export function useVectorMathState(alchemyActive: boolean) {
@@ -60,14 +64,7 @@ export function useVectorMathState(alchemyActive: boolean) {
   useEffect(() => {
     if (!alchemyActive || isNameEdited || ingredients.length === 0) return;
     
-    const totalCount = positives.length + negatives.length;
-    let name = 'Synthesized Compound';
-    if (totalCount === 0) {
-      name = 'Empty Formulation';
-    } else if (totalCount === 1) {
-      const idx = positives.length === 1 ? positives[0] : negatives[0];
-      name = ingredients[idx]?.name || 'Synthesized Compound';
-    }
+    const name = determineDefaultRecipeName(positives, negatives, ingredients);
     setCustomName(name);
     setUrlName(name);
   }, [positives, negatives, ingredients, isNameEdited, alchemyActive]);
@@ -221,12 +218,7 @@ export function useVectorMathState(alchemyActive: boolean) {
 
   useEffect(() => {
     if (primaryIdx === null || pointCloud.length === 0 || alchemyActive) return setHoveredNeighbors([]);
-    const target = pointCloud[primaryIdx];
-    if (!target) return;
-    const candidates = pointCloud
-      .filter((p) => p.index !== primaryIdx)
-      .map((p) => ({ name: p.name, score: Math.sqrt((p.x - target.x) ** 2 + (p.y - target.y) ** 2 + (p.z - target.z) ** 2) }))
-      .sort((a, b) => a.score - b.score);
+    const candidates = findNearestNeighbors3D(primaryIdx, pointCloud);
     setHoveredNeighbors(candidates.slice(0, 3));
   }, [primaryIdx, pointCloud, alchemyActive]);
 

@@ -3,7 +3,8 @@ import {
   calculateTasteMeans,
   calculateUmapCenterOffset,
   generatePointCloud,
-  performKMeansClustering
+  performKMeansClustering,
+  findNearestNeighbors3D
 } from '../math';
 import { Ingredient } from '../types';
 
@@ -116,6 +117,26 @@ describe('Math Utilities & Algorithms', () => {
     it('should handle empty point arrays safely', () => {
       const clusters = performKMeansClustering([]);
       expect(clusters).toEqual([]);
+    });
+  });
+
+  describe('findNearestNeighbors3D', () => {
+    it('should find closest neighbors in sorted Euclidean distance order', () => {
+      const pointCloud = [
+        { index: 0, name: 'Target', x: 0, y: 0, z: 0 },
+        { index: 1, name: 'Far', x: 100, y: 100, z: 100 },
+        { index: 2, name: 'Close', x: 1, y: 1, z: 1 },
+      ];
+      const neighbors = findNearestNeighbors3D(0, pointCloud);
+      expect(neighbors.length).toBe(2);
+      expect(neighbors[0].name).toBe('Close');
+      expect(neighbors[1].name).toBe('Far');
+      expect(neighbors[0].score).toBeCloseTo(Math.sqrt(3), 3);
+    });
+
+    it('should return empty list if target index is not found', () => {
+      const neighbors = findNearestNeighbors3D(99, []);
+      expect(neighbors).toEqual([]);
     });
   });
 });

@@ -120,6 +120,22 @@ export function determineDominantTasteColor(
   return TASTE_COLORS[dominantIdx] || '#bf9525';
 }
 
+// Pure function to determine default alchemical recipe name dynamically
+export function determineDefaultRecipeName(
+  positives: number[],
+  negatives: number[],
+  ingredients: Ingredient[]
+): string {
+  const totalCount = positives.length + negatives.length;
+  if (totalCount === 0) {
+    return 'Empty Formulation';
+  } else if (totalCount === 1) {
+    const idx = positives.length === 1 ? positives[0] : negatives[0];
+    return ingredients[idx]?.name || 'Synthesized Compound';
+  }
+  return 'Synthesized Compound';
+}
+
 interface AlchemicalCalculationsProps {
   alchemyActive: boolean;
   positives: number[];

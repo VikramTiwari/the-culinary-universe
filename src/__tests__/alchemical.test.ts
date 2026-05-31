@@ -3,7 +3,8 @@ import {
   calculateSynthesizedSensory,
   determineDominantTasteColor,
   calculateAlchemicalNodeCoords,
-  calculateDynamicZoom
+  calculateDynamicZoom,
+  determineDefaultRecipeName
 } from '../hooks/useAlchemicalCalculations';
 import { Ingredient } from '../types';
 
@@ -132,6 +133,23 @@ describe('Alchemical Synthesis Calculations', () => {
       // Expected formula: Math.max(4.5, Math.min(13.0, 14.5 - maxDist * 0.05))
       // maxDist = 86.6. 14.5 - 86.6 * 0.05 = 14.5 - 4.33 = 10.17
       expect(zoom).toBeCloseTo(10.17, 1);
+    });
+  });
+
+  describe('determineDefaultRecipeName', () => {
+    it('should return "Empty Formulation" if positives and negatives are empty', () => {
+      const name = determineDefaultRecipeName([], [], mockIngredients);
+      expect(name).toBe('Empty Formulation');
+    });
+
+    it('should return ingredient name if single element is active', () => {
+      const name = determineDefaultRecipeName([0], [], mockIngredients);
+      expect(name).toBe('Sugar');
+    });
+
+    it('should return "Synthesized Compound" if multiple elements are active', () => {
+      const name = determineDefaultRecipeName([0, 1], [], mockIngredients);
+      expect(name).toBe('Synthesized Compound');
     });
   });
 });

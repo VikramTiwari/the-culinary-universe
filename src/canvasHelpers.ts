@@ -216,7 +216,7 @@ export function drawAlchemicalTethers(
   projected: CanvasProjectedPoint[],
   projectionParams: ProjectionParams,
   zoom: number,
-  singleElementIdx: number | null,
+  _singleElementIdx: number | null,
   frame: number
 ) {
   if (!alchemicalNode) return;
@@ -270,21 +270,4 @@ export function drawAlchemicalTethers(
       }
     });
   }
-
-  ctx.lineWidth = 1.2;
-  ctx.strokeStyle = 'rgba(96, 108, 56, 0.45)';
-  ctx.setLineDash([3, 3]);
-
-  alchemicalNode.searchResults.slice(0, 10).forEach((res: { index: number; score: number }) => {
-    const p = projected.find((item) => item.index === res.index);
-    if (p) {
-      if (p.index === singleElementIdx) return;
-      if (alchemicalNode.positives.includes(p.index) || alchemicalNode.negatives.includes(p.index)) return;
-      ctx.beginPath();
-      ctx.moveTo(px, py);
-      ctx.lineTo(p.px, p.py);
-      ctx.stroke();
-    }
-  });
-  ctx.setLineDash([]);
 }

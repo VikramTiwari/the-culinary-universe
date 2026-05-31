@@ -131,7 +131,6 @@ export function drawScene(options: DrawSceneOptions) {
   if (alchemyActive && alchemicalNode) {
     alchemicalNode.positives.forEach((idx) => alchemicalActiveSet.add(idx));
     alchemicalNode.negatives.forEach((idx) => alchemicalActiveSet.add(idx));
-    alchemicalNode.searchResults.slice(0, 10).forEach((res) => alchemicalActiveSet.add(res.index));
   }
 
   projected.sort((a, b) => b.rz - a.rz);
@@ -175,7 +174,7 @@ export function drawScene(options: DrawSceneOptions) {
     alchemicalActiveSet
   );
 
-  // Draw all positive, negative, and search result matching nodes as highlighted active nodes with their original home colors
+  // Draw all positive and negative nodes as highlighted active nodes with their original home colors
   if (alchemyActive && alchemicalNode) {
     alchemicalNode.positives.forEach((idx) => {
       if (idx === currentSelectedIdx || idx === hoveredIdx) return;
@@ -187,12 +186,6 @@ export function drawScene(options: DrawSceneOptions) {
       if (idx === currentSelectedIdx || idx === hoveredIdx) return;
       const p = projected.find((item) => item.index === idx);
       if (p) drawActiveNode(ctx, p, frame, true, false, true);
-    });
-
-    alchemicalNode.searchResults.slice(0, 10).forEach((res) => {
-      if (res.index === currentSelectedIdx || res.index === hoveredIdx) return;
-      const p = projected.find((item) => item.index === res.index);
-      if (p) drawActiveNode(ctx, p, frame, false, false, false);
     });
   }
 
